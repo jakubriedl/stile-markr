@@ -7,13 +7,14 @@ This repository is currently in planning. No application has been implemented.
 ## Repository
 
 - [`PLAN.md`](PLAN.md) — current plan and todo list
+- [`REQUIREMENTS.md`](REQUIREMENTS.md) — product requirements and acceptance criteria
 - [`NOTES.md`](NOTES.md) — development considerations and context
 - [`AGENTS.md`](AGENTS.md) — guidance for agents working in this repository
 - [`task/`](task/) — task brief and supporting materials
 
 ## Setup
 
-To be defined after requirements and architecture are clarified.
+To be defined after the architecture is designed.
 
 ## Architecture
 

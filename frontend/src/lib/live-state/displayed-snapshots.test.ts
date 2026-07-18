@@ -72,6 +72,45 @@ describe("displayed snapshots", () => {
     expect(synced.nextFingerprint).toBe("next");
   });
 
+  it("fingerprints list rows order-independently", () => {
+    const a = fingerprintTestsList([
+      { test_id: "b", student_count: 1, marks_available: 10 },
+      { test_id: "a", student_count: 2, marks_available: 20 },
+    ]);
+    const b = fingerprintTestsList([
+      { test_id: "a", student_count: 2, marks_available: 20 },
+      { test_id: "b", student_count: 1, marks_available: 10 },
+    ]);
+    expect(a).toBe(b);
+  });
+
+  it("clears announcements while waiting for the first successful payload", () => {
+    const synced = syncRefreshFromPoll({
+      isError: false,
+      fingerprint: null,
+      previousFingerprint: null,
+      changedAnnouncement: null,
+      at: "2026-07-18T10:00:00.000Z",
+    });
+    expect(synced.event).toEqual({ type: "clearAnnouncement" });
+    expect(synced.nextFingerprint).toBeNull();
+  });
+
+  it("maps unchanged successful polls without a change announcement", () => {
+    const synced = syncRefreshFromPoll({
+      isError: false,
+      fingerprint: "same",
+      previousFingerprint: "same",
+      changedAnnouncement: null,
+      at: "2026-07-18T10:00:00.000Z",
+    });
+    expect(synced.event).toEqual({
+      type: "success",
+      at: "2026-07-18T10:00:00.000Z",
+    });
+    expect(synced.nextFingerprint).toBe("same");
+  });
+
   it("labels last refreshed timestamps as UTC", () => {
     expect(formatLastRefreshedUtc(null)).toBe("Not yet refreshed");
     expect(formatLastRefreshedUtc("2026-07-18T10:00:00.000Z")).toBe("2026-07-18T10:00:00.000Z UTC");

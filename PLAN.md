@@ -33,8 +33,8 @@ The task brief is available in [`task/README.md`](task/README.md).
 
 ### Wave 2 — reviewed feature tracks
 
-- [ ] Land canonical result normalization, Zod boundaries, and Drizzle schema definitions in one reviewed backend-domain commit.
-- [ ] Generate, apply, and inspect the initial SQLite migration in a separate integrator commit.
+- [x] Land canonical result normalization, Zod boundaries, and Drizzle schema definitions in one reviewed backend-domain commit.
+- [x] Generate, apply, and inspect the initial SQLite migration in a separate integrator commit.
 - [ ] Land reviewed backend-import commits for streamed XML validation, bounded worker admission, transactional maxima/upserts, and the import HTTP contract.
 - [ ] Land reviewed backend-reporting commits for aggregates/histograms, list/ETag behavior, readiness/lifecycle, and privacy-safe telemetry.
 - [ ] Land reviewed frontend-UI commits for tokens/primitives, upload/list/detail states, Storybook interactions, axe, themes, and reduced motion.

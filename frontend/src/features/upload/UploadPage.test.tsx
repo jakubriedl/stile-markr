@@ -4,7 +4,11 @@ import { describe, expect, it, vi } from "vitest";
 
 import { UploadPage } from "./UploadPage.tsx";
 
-function selectFile(input: HTMLElement, file: File) {
+function selectFile(file: File) {
+  const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+  if (input == null) {
+    throw new Error("Expected FileTrigger to render a file input");
+  }
   fireEvent.change(input, { target: { files: [file] } });
 }
 
@@ -14,8 +18,9 @@ describe("UploadPage", () => {
     render(<UploadPage onUpload={onUpload} />);
 
     expect(screen.getByRole("heading", { name: "Upload exam results" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Choose file" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Upload" })).toBeDisabled();
-    expect(screen.getByRole("link", { name: "View tests" })).toHaveAttribute("href", "/tests");
+    expect(screen.queryByRole("link", { name: "View tests" })).not.toBeInTheDocument();
     expect(onUpload).not.toHaveBeenCalled();
   });
 
@@ -23,12 +28,11 @@ describe("UploadPage", () => {
     const onUpload = vi.fn();
     render(<UploadPage onUpload={onUpload} />);
 
-    const input = screen.getByLabelText("Results XML file");
-    selectFile(input, new File(["nope"], "notes.txt", { type: "text/plain" }));
+    selectFile(new File(["nope"], "notes.txt", { type: "text/plain" }));
     expect(screen.getByRole("alert")).toHaveTextContent("Selected file must be XML.");
     expect(screen.getByRole("button", { name: "Upload" })).toBeDisabled();
 
-    selectFile(input, new File([new Uint8Array(52_428_801)], "huge.xml", { type: "text/xml" }));
+    selectFile(new File([new Uint8Array(52_428_801)], "huge.xml", { type: "text/xml" }));
     expect(screen.getByRole("alert")).toHaveTextContent("Selected file must not exceed 50 MiB.");
   });
 
@@ -38,11 +42,11 @@ describe("UploadPage", () => {
       .fn()
       .mockResolvedValueOnce({ imported: 3 })
       .mockRejectedValueOnce(new Error("Import capacity exceeded"));
-    render(<UploadPage onUpload={onUpload} testsHref="/tests" />);
+    render(<UploadPage onUpload={onUpload} />);
 
-    const input = screen.getByLabelText("Results XML file");
     const xmlFile = new File(["<results />"], "results.xml", { type: "text/xml" });
-    selectFile(input, xmlFile);
+    selectFile(xmlFile);
+    expect(screen.getByTestId("selected-file-name")).toHaveTextContent("results.xml");
     await user.click(screen.getByRole("button", { name: "Upload" }));
 
     await expect(screen.findByRole("status")).resolves.toHaveTextContent(
@@ -50,7 +54,7 @@ describe("UploadPage", () => {
     );
     expect(onUpload).toHaveBeenCalledWith(xmlFile);
 
-    selectFile(input, xmlFile);
+    selectFile(xmlFile);
     await user.click(screen.getByRole("button", { name: "Upload" }));
     await waitFor(() => {
       expect(screen.getByRole("alert")).toHaveTextContent("Import capacity exceeded");

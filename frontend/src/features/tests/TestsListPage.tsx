@@ -1,4 +1,5 @@
 import { Alert } from "../../components/ui/Alert.tsx";
+import { PageHeading } from "../../components/ui/Heading.tsx";
 import { Link } from "../../components/ui/Link.tsx";
 import { formatLastRefreshedUtc } from "../../lib/live-state/displayed-snapshots.ts";
 
@@ -28,9 +29,9 @@ export function TestsListPage({
   uploadHref = "/",
 }: TestsListPageProps) {
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8">
+    <main className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
-        <h1 className="m-0 font-[family-name:var(--markr-font-display)] text-3xl">Tests</h1>
+        <PageHeading>Tests</PageHeading>
         <p className="m-0 text-sm text-[var(--markr-fg-muted)]">
           Last refreshed: {formatLastRefreshedUtc(lastRefreshedAt)}
           {stale ? " (stale)" : ""}

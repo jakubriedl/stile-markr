@@ -57,8 +57,10 @@ describe("TestDetailPage", () => {
     expect(screen.getByText(/2026-07-18T10:00:00.000Z UTC \(stale\)/)).toBeInTheDocument();
     expect(screen.getByText(/Connection restored/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Aggregate statistics" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Score histogram" })).toBeInTheDocument();
     expect(screen.getByLabelText("Mean 50.00% percent")).toBeInTheDocument();
     expect(screen.getByLabelText("40 to 50 percent: 28 students")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Back to tests" })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Retry" }));
     expect(onRetry).toHaveBeenCalledOnce();

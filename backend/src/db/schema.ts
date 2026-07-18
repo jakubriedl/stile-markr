@@ -22,7 +22,9 @@ export const results = sqliteTable(
     primaryKey({ columns: [table.testId, table.studentNumber] }),
     check(
       "results_test_id_canonical",
-      sql`length(${table.testId}) > 0 AND ${table.testId} GLOB '[a-z0-9_-]*'`,
+      // NOT GLOB '*[^class]*' means every character is in the canonical class.
+      // GLOB '[class]*' is wrong: after one class match, * matches anything.
+      sql`length(${table.testId}) > 0 AND ${table.testId} NOT GLOB '*[^a-z0-9_-]*'`,
     ),
     check(
       "results_student_number_safe",
@@ -50,7 +52,7 @@ export const importRequestKeys = sqliteTable(
     primaryKey({ columns: [table.testId, table.studentNumber] }),
     check(
       "import_request_keys_test_id_canonical",
-      sql`length(${table.testId}) > 0 AND ${table.testId} GLOB '[a-z0-9_-]*'`,
+      sql`length(${table.testId}) > 0 AND ${table.testId} NOT GLOB '*[^a-z0-9_-]*'`,
     ),
     check(
       "import_request_keys_student_number_safe",

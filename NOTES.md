@@ -172,6 +172,8 @@ GitHub Actions will run frozen installation, Oxc, typechecking, unit/integration
 
 Docker images install with pnpm (`--frozen-lockfile`) and serve with Bun. Backend images use `pnpm deploy --legacy` so production containers receive an isolated package tree without enabling workspace package injection. Compose starts migrate → healthy backend → frontend against a named SQLite volume; the optional `observability` profile runs a debug OpenTelemetry Collector that is not a readiness dependency. Local smoke: `pnpm compose:smoke` (requires a running Docker daemon).
 
+Acceptance evidence (rev `aaa27a8` + retry fix): clean-volume Compose smoke passed; Playwright Chromium exercised the sample XML UI upload (Cursor built-in browser cannot attach host filesystem files or fetch host fixture servers); Cursor browser verified list/detail oracles, live count update to 82, stale announcement after backend stop (~8.5s), and recovery announcement after restart. List/detail polling uses `retry: 1` so outages can reach `isError`/stale UI (infinite `retry: true` never settled). Safari/VoiceOver remains a manual checklist in `README.md`.
+
 <a id="note-arch-008"></a>
 ### NOTE-ARCH-008 — Agent skills and React Doctor
 

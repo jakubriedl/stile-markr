@@ -38,6 +38,7 @@ function TestDetailRoute() {
           return result.data;
         },
         refetchInterval: QUERY_POLL_INTERVAL_MS,
+        retry: 1,
       },
       {
         queryKey: queryKeys.histogram(testId),
@@ -53,6 +54,7 @@ function TestDetailRoute() {
           return result.data;
         },
         refetchInterval: QUERY_POLL_INTERVAL_MS,
+        retry: 1,
       },
     ],
   });

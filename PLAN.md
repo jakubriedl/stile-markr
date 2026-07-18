@@ -53,8 +53,8 @@ The task brief is available in [`task/README.md`](task/README.md).
 - [x] Add reviewed non-root images, migration/backend/frontend Compose ordering, persistence, and optional Collector configuration.
 - [x] Add reviewed least-privilege CI, quality/smoke jobs, and coverage/Storybook artifacts.
 - [x] Run clean-volume Compose smoke.
-- [ ] Run authorized destructive browser acceptance (`markr-browser-e2e`).
-- [ ] Complete manual Safari/VoiceOver checks, documentation, final adversarial review, and reviewer handoff.
+- [x] Run authorized destructive browser acceptance (`markr-browser-e2e`).
+- [ ] Complete manual Safari/VoiceOver checks (checklist in README), final adversarial review, and reviewer handoff.
 
 <!-- Extend this list with implementation and other todo items as they are discovered. -->
 

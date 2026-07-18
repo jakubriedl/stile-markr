@@ -31,7 +31,8 @@ function TestsRoute() {
       return result.data;
     },
     refetchInterval: QUERY_POLL_INTERVAL_MS,
-    retry: true,
+    // Finite retries so prolonged backend outages can enter the stale/error UI.
+    retry: 1,
   });
 
   useEffect(() => {

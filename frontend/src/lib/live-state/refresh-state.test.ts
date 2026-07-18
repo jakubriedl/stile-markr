@@ -28,4 +28,17 @@ describe("reduceRefreshState", () => {
     });
     expect(next.announcement).toBe("Test list updated. 2 tests available.");
   });
+
+  it("clears announcements and accepts custom stale copy", () => {
+    const announced = reduceRefreshState(initialRefreshState, {
+      type: "failure",
+      staleAnnouncement: "Custom stale message.",
+    });
+    expect(announced.announcement).toBe("Custom stale message.");
+
+    const cleared = reduceRefreshState(announced, { type: "clearAnnouncement" });
+    expect(cleared.announcement).toBeNull();
+    expect(cleared.phase).toBe("stale");
+  });
 });
+

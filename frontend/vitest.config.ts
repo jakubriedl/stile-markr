@@ -13,7 +13,15 @@ const chromiumExecutablePath = resolveChromiumExecutable();
 export default defineConfig({
   test: {
     coverage: {
-      exclude: ["src/routeTree.gen.ts", "src/**/*.stories.tsx"],
+      exclude: [
+        "src/routeTree.gen.ts",
+        "src/**/*.stories.tsx",
+        "src/lib/api/types.ts",
+        "src/components/ui/index.ts",
+        "src/styles/**",
+        // Thin file-route shells; feature pages and API client carry the behavior under test.
+        "src/routes/**",
+      ],
       include: ["src/**/*.{ts,tsx}", "server/**/*.ts"],
       provider: "v8",
       reporter: ["text", "json-summary", "html"],
@@ -24,6 +32,7 @@ export default defineConfig({
         statements: 80,
       },
     },
+
     projects: [
       {
         extends: true,

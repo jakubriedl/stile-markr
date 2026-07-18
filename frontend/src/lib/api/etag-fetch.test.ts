@@ -1,27 +1,13 @@
 import { http, HttpResponse } from "msw";
-import { setupServer } from "msw/node";
-import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
+import { mockServer } from "../../../tests/msw-server.ts";
 import { fetchJsonWithEtag } from "./etag-fetch.ts";
-
-const server = setupServer();
-
-beforeAll(() => {
-  server.listen({ onUnhandledRequest: "error" });
-});
-
-afterEach(() => {
-  server.resetHandlers();
-});
-
-afterAll(() => {
-  server.close();
-});
 
 describe("fetchJsonWithEtag", () => {
   it("stores ETags and preserves cached data on 304", async () => {
     let hits = 0;
-    server.use(
+    mockServer.use(
       http.get("http://localhost/api/tests", ({ request }) => {
         hits += 1;
         if (request.headers.get("If-None-Match") === '"v1"') {
@@ -56,4 +42,28 @@ describe("fetchJsonWithEtag", () => {
     });
     expect(hits).toBeGreaterThanOrEqual(2);
   });
+
+  it("treats a bare 304 without cache as an error and maps HTTP failures", async () => {
+    mockServer.use(
+      http.get("http://localhost/api/tests", () => {
+        return new HttpResponse(null, { status: 304, headers: { ETag: '"v1"' } });
+      }),
+      http.get("http://localhost/api/missing", () =>
+        HttpResponse.json({ error: "Not found" }, { status: 404 }),
+      ),
+    );
+
+    await expect(fetchJsonWithEtag("http://localhost/api/tests", null)).resolves.toEqual({
+      status: "error",
+      statusCode: 304,
+      body: null,
+    });
+
+    await expect(fetchJsonWithEtag("http://localhost/api/missing", null)).resolves.toEqual({
+      status: "error",
+      statusCode: 404,
+      body: { error: "Not found" },
+    });
+  });
 });
+

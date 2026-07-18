@@ -194,7 +194,7 @@ The earlier direct-to-`main` note described solo work before CI and concurrent a
 
 Validated focused commits are cherry-picked onto `main`, preserving a linear history, and temporary worktrees/branches are removed. A fresh read-only adversarial reviewer runs after every agent change and again after fixes. Integration is blocked by requirement mismatches, failing checks, critical/high findings, or unresolved medium findings unless accepted debt is explicitly recorded.
 
-GPT-5.6 Sol Extra High is the parent orchestrator, integration owner, conflict resolver, and mandatory adversarial reviewer. GPT-5.6 Terra Medium handles narrow implementation lanes. A lane escalates to Sol Extra High only for an unresolved blocker or repeated review failure.
+GPT-5.6 Sol Extra High is the parent orchestrator, integration owner, and conflict resolver. Grok 4.5 is the mandatory adversarial reviewer. GPT-5.6 Terra Medium handles narrow implementation lanes. A lane escalates to Sol Extra High only for an unresolved blocker or repeated review failure.
 
 <!--
 ### YYYY-MM-DD — Short title

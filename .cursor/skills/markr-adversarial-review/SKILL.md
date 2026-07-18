@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Markr Adversarial Review
 
-Use a fresh GPT-5.6 Sol Extra High reviewer. The reviewer must not edit files, amend commits, or trust the implementer's summary.
+Use a fresh Grok 4.5 reviewer (`cursor-grok-4.5-high-fast`). The reviewer must not edit files, amend commits, or trust the implementer's summary.
 
 ## Inputs
 

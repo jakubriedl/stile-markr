@@ -498,7 +498,8 @@ Architecture decisions: [`NOTE-ARCH-008`](NOTES.md#note-arch-008), [`NOTE-ARCH-0
 
 ### 15.1 Models
 
-- **GPT-5.6 Sol Extra High:** parent orchestration, architecture enforcement, integration, conflict resolution, and every fresh adversarial review.
+- **GPT-5.6 Sol Extra High:** parent orchestration, architecture enforcement, integration, and conflict resolution.
+- **Grok 4.5:** every fresh read-only adversarial review via `markr-adversarial-review`.
 - **GPT-5.6 Terra Medium:** focused implementation lanes with explicit goals, owned paths, requirements, and validation commands.
 - Escalation to Sol Extra High occurs only after an unresolved blocker or repeated failed review.
 
@@ -518,7 +519,7 @@ Only the integrator edits root manifests, `pnpm-lock.yaml`, shared configuration
 
 ### 15.3 Review gate
 
-After an implementation commit, a fresh Sol Extra High reviewer uses the `markr-adversarial-review` skill. It must not edit. Every finding contains severity, file/location, requirement IDs, evidence, impact, required fix, and missing regression test.
+After an implementation commit, a fresh Grok 4.5 reviewer uses the `markr-adversarial-review` skill. It must not edit. Every finding contains severity, file/location, requirement IDs, evidence, impact, required fix, and missing regression test.
 
 Integration is blocked by:
 

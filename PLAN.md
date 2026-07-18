@@ -60,7 +60,8 @@ The task brief is available in [`task/README.md`](task/README.md).
 
 ## Agent execution rules
 
-- GPT-5.6 Sol Extra High orchestrates, integrates, resolves conflicts, and performs every adversarial review.
+- GPT-5.6 Sol Extra High orchestrates, integrates, and resolves conflicts.
+- Grok 4.5 performs every adversarial review.
 - GPT-5.6 Terra Medium implements focused lanes and escalates only after a blocker or repeated failed review.
 - Parallel lanes use temporary `agent/<wave>/<lane>` branches in isolated worktrees with exclusive paths.
 - Only the integrator edits root manifests, `pnpm-lock.yaml`, migrations, generated entrypoints/route trees, Compose, and workflows. Feature agents request dependencies.

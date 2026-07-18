@@ -32,7 +32,8 @@ Application implementation is in progress on `main`, with Compose/CI landed and 
 
 ## Parallel implementation
 
-- GPT-5.6 Sol Extra High orchestrates, integrates, resolves conflicts, and performs adversarial reviews.
+- GPT-5.6 Sol Extra High orchestrates, integrates, and resolves conflicts.
+- Grok 4.5 performs every read-only `markr-adversarial-review`.
 - GPT-5.6 Terra Medium handles narrow implementation lanes.
 - Parallel agents use temporary `agent/<wave>/<lane>` branches in isolated worktrees with explicit writable paths.
 - Only the integrator edits root manifests, `pnpm-lock.yaml`, migrations, generated entrypoints/route trees, Docker Compose, and workflows.

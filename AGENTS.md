@@ -49,4 +49,10 @@ This is a greenfield repository with clarified requirements and a designed archi
 - Run React Doctor after frontend changes once the foundation task installs it.
 - Use `markr-browser-e2e` only when destructive full-stack acceptance is explicitly requested; it deletes the normal Compose volume.
 
-Concrete commands will be documented when the workspace scaffold creates them.
+## Validation commands
+
+- Narrow package checks: `pnpm --filter @markr/backend test`, `pnpm --filter @markr/frontend test`, and the corresponding `typecheck` script.
+- Real-process checks: `pnpm test:integration`.
+- Frontend review: `pnpm doctor`, `pnpm --filter @markr/frontend storybook:build`, and `pnpm --filter @markr/frontend build`.
+- Full local gate: `pnpm validate`, followed by `pnpm test:integration` and the Storybook build.
+- CI installs with `pnpm install --frozen-lockfile`.

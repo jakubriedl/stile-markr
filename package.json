@@ -6,6 +6,8 @@
     "build": "turbo run build",
     "coverage": "turbo run coverage",
     "dev": "turbo run dev --parallel",
+    "doctor": "pnpm --filter @markr/frontend exec react-doctor .",
+    "doctor:changed": "pnpm --filter @markr/frontend exec react-doctor . --verbose --scope changed",
     "format": "oxfmt .oxfmtrc.json package.json pnpm-workspace.yaml turbo.json tsconfig.base.json backend frontend",
     "format:check": "oxfmt --check .oxfmtrc.json package.json pnpm-workspace.yaml turbo.json tsconfig.base.json backend frontend",
     "lint": "oxlint --deny-warnings backend frontend",

@@ -36,6 +36,10 @@ export function reduceRefreshState(state: RefreshState, event: RefreshEvent): Re
       };
     }
     case "failure":
+      // Stale/recovery only after at least one successful paint (LIST-008 / DETAIL-010).
+      if (state.lastRefreshedAt == null) {
+        return { ...state, announcement: null };
+      }
       if (state.phase === "stale" || state.phase === "recovering") {
         return { ...state, announcement: null };
       }

@@ -8,6 +8,7 @@ import {
   listChangeAnnouncement,
   syncRefreshFromPoll,
 } from "./displayed-snapshots.ts";
+import { initialRefreshState, reduceRefreshState } from "./refresh-state.ts";
 
 const sampleAggregate = {
   mean: 50,
@@ -54,6 +55,61 @@ describe("displayed snapshots", () => {
     });
     expect(synced.event).toEqual({ type: "failure" });
     expect(synced.nextFingerprint).toBe("prev");
+  });
+
+  it("treats initial poll errors as non-stale so first success stays silent", () => {
+    const initialError = syncRefreshFromPoll({
+      isError: true,
+      fingerprint: null,
+      previousFingerprint: null,
+      changedAnnouncement: null,
+      at: "2026-07-18T10:00:00.000Z",
+    });
+    expect(initialError.event).toEqual({ type: "clearAnnouncement" });
+    expect(initialError.nextFingerprint).toBeNull();
+
+    let refresh = reduceRefreshState(initialRefreshState, initialError.event);
+    expect(refresh.phase).toBe("fresh");
+    expect(refresh.announcement).toBeNull();
+
+    const firstSuccess = syncRefreshFromPoll({
+      isError: false,
+      fingerprint: "loaded",
+      previousFingerprint: null,
+      changedAnnouncement: null,
+      at: "2026-07-18T10:00:01.000Z",
+    });
+    refresh = reduceRefreshState(refresh, firstSuccess.event);
+    expect(refresh.phase).toBe("fresh");
+    expect(refresh.announcement).toBeNull();
+    expect(refresh.lastRefreshedAt).toBe("2026-07-18T10:00:01.000Z");
+  });
+
+  it("still announces stale then recovery after a successful paint", () => {
+    let refresh = reduceRefreshState(initialRefreshState, {
+      type: "success",
+      at: "2026-07-18T10:00:00.000Z",
+    });
+    const failed = syncRefreshFromPoll({
+      isError: true,
+      fingerprint: null,
+      previousFingerprint: "loaded",
+      changedAnnouncement: null,
+      at: "2026-07-18T10:00:01.000Z",
+    });
+    refresh = reduceRefreshState(refresh, failed.event);
+    expect(refresh.phase).toBe("stale");
+    expect(refresh.announcement).toMatch(/Unable to refresh/);
+
+    const recovered = syncRefreshFromPoll({
+      isError: false,
+      fingerprint: "loaded",
+      previousFingerprint: "loaded",
+      changedAnnouncement: null,
+      at: "2026-07-18T10:00:02.000Z",
+    });
+    refresh = reduceRefreshState(refresh, recovered.event);
+    expect(refresh.announcement).toMatch(/Connection restored/);
   });
 
   it("maps successful fingerprint changes to a success announcement event", () => {

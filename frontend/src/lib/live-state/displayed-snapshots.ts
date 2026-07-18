@@ -88,9 +88,17 @@ export type PollSyncResult = {
 /**
  * Shared list/detail poll → refresh-state transition.
  * Covered by unit tests so route shells can stay thin.
+ * Initial load errors (no prior fingerprint) stay out of stale/recovery;
+ * LIST-008 / DETAIL-010 apply only after a successful paint.
  */
 export function syncRefreshFromPoll(input: PollSyncInput): PollSyncResult {
   if (input.isError) {
+    if (input.previousFingerprint == null) {
+      return {
+        event: { type: "clearAnnouncement" },
+        nextFingerprint: null,
+      };
+    }
     return {
       event: { type: "failure" },
       nextFingerprint: input.previousFingerprint,

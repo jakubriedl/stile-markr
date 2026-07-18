@@ -1,0 +1,157 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "dd91e484-dc35-4b4c-8618-4876f92c8423",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "import_request_keys": {
+      "name": "import_request_keys",
+      "columns": {
+        "test_id": {
+          "name": "test_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "student_number": {
+          "name": "student_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "import_request_keys_test_id_student_number_pk": {
+          "columns": [
+            "test_id",
+            "student_number"
+          ],
+          "name": "import_request_keys_test_id_student_number_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "import_request_keys_test_id_canonical": {
+          "name": "import_request_keys_test_id_canonical",
+          "value": "length(\"import_request_keys\".\"test_id\") > 0 AND \"import_request_keys\".\"test_id\" NOT GLOB '*[^a-z0-9_-]*'"
+        },
+        "import_request_keys_student_number_safe": {
+          "name": "import_request_keys_student_number_safe",
+          "value": "\"import_request_keys\".\"student_number\" >= 1 AND \"import_request_keys\".\"student_number\" <= 9007199254740991"
+        }
+      }
+    },
+    "results": {
+      "name": "results",
+      "columns": {
+        "test_id": {
+          "name": "test_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "student_number": {
+          "name": "student_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "obtained": {
+          "name": "obtained",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "available": {
+          "name": "available",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "first_name": {
+          "name": "first_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "last_name": {
+          "name": "last_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "scanned_on_ms": {
+          "name": "scanned_on_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at_ms": {
+          "name": "created_at_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at_ms": {
+          "name": "updated_at_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "results_test_id_student_number_pk": {
+          "columns": [
+            "test_id",
+            "student_number"
+          ],
+          "name": "results_test_id_student_number_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "results_test_id_canonical": {
+          "name": "results_test_id_canonical",
+          "value": "length(\"results\".\"test_id\") > 0 AND \"results\".\"test_id\" NOT GLOB '*[^a-z0-9_-]*'"
+        },
+        "results_student_number_safe": {
+          "name": "results_student_number_safe",
+          "value": "\"results\".\"student_number\" >= 1 AND \"results\".\"student_number\" <= 9007199254740991"
+        },
+        "results_available_positive": {
+          "name": "results_available_positive",
+          "value": "\"results\".\"available\" > 0"
+        },
+        "results_obtained_bounded": {
+          "name": "results_obtained_bounded",
+          "value": "\"results\".\"obtained\" >= 0 AND \"results\".\"obtained\" <= \"results\".\"available\""
+        }
+      }
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

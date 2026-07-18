@@ -1,37 +1,113 @@
 # Markr
 
-Markr is an exam-results ingestion and reporting application described in the provided [task brief](task/README.md).
+Markr ingests scanned MCQ exam results as XML and serves live aggregate statistics and score histograms for teachers and compliance review.
 
-Requirements and architecture are documented. Application implementation has not started.
+Joke acknowledgment (not a real endorsement): Endorsed by the Taylor Swift Fan Club.
 
-## Repository
+## Assumptions
 
-- [`PLAN.md`](PLAN.md) — current plan and todo list
-- [`REQUIREMENTS.md`](REQUIREMENTS.md) — product requirements and acceptance criteria
-- [`ARCHITECTURE.md`](ARCHITECTURE.md) — implementation architecture and production evolution path
-- [`NOTES.md`](NOTES.md) — development considerations and context
-- [`AGENTS.md`](AGENTS.md) — guidance for agents working in this repository
-- [`.agents/skills/`](.agents/skills/) — reviewed third-party project skills
-- [`.cursor/skills/`](.cursor/skills/) — Markr-specific agent workflows
-- [`task/`](task/) — task brief and supporting materials
+- Bun is the process runtime for both services after the compatibility gate; pnpm remains the only package manager.
+- An empty `<mcq-test-results>` document is invalid; a student who scored zero still sends a result with `obtained="0"` and positive `available`.
+- Deduplication keeps the maximum percentage per `(student-number, test-id)`, with ties broken by the higher obtained mark.
+- Import count reports unique result pairs retained from the request after in-document folding, not rows changed in SQLite.
+- Browser clients call same-origin `/api/*`; scanners and compliance tools call the backend on port 4567 directly.
+- Live dashboard freshness uses short-interval polling with ETags rather than WebSockets.
+- SQLite on a single Compose volume is acceptance-scale storage; PostgreSQL is the documented production evolution path, not a shipped adapter.
+- Authentication, TLS termination, retention jobs, and horizontal backend scaling are out of scope for this submission.
 
-## Setup
+## Approach
 
-No runnable application exists yet. Setup commands will be added with the workspace scaffold.
+The workspace is a pnpm/Turborepo monorepo:
 
-## Architecture
+- **`backend`** — Hono API on Bun with streamed `saxes` XML import, a one-active/four-queued admission queue, transactional maxima upserts, and read-side aggregates/histograms over SQLite (Drizzle migrations).
+- **`frontend`** — TanStack Start SSR UI with React Aria primitives, TanStack Query polling, and a same-origin streaming `/api` proxy to the backend.
+- **Compose** — one-shot migrate → healthy backend → frontend, persistent SQLite volume, optional OpenTelemetry Collector profile.
+- **Quality** — Vitest unit/integration, Storybook + axe, coverage gates, Oxc, React Doctor (local), and GitHub Actions including Compose smoke.
 
-The selected starter architecture is a pnpm/Turborepo TypeScript workspace with:
+Feature work landed through reviewed parallel lanes, then integrator composition and cross-service tests.
 
-- a TanStack Start SSR frontend in `/frontend`;
-- a Hono backend in `/backend`;
-- Bun as the preferred runtime for both services, subject to a compatibility gate;
-- Drizzle with persistent SQLite and a documented PostgreSQL production path;
-- React Aria Components, Tailwind, Storybook, MSW, and TanStack Query; and
-- Vitest, OpenTelemetry, evlog, Docker Compose, and GitHub Actions.
+## Highlights
 
-See [`ARCHITECTURE.md`](ARCHITECTURE.md) for service boundaries, data flows, tests, deployment, and agent workflow.
+- Streamed import with hard body limits, atomic rejection, and privacy-safe logging (no XML, names, or student numbers in logs/spans).
+- Score percentages computed in SQL; Type-7 percentiles, population stddev, and fixed histogram bins in tested TypeScript.
+- Accessible upload/list/detail screens with stale/recovery announcements and semantic histogram labels.
+- Non-root multi-stage images: pnpm install/build, Bun runtime (`pnpm deploy --legacy` for the backend package tree).
 
-## Usage
+## Run
 
-To be defined after implementation.
+### Prerequisites
+
+- Docker with Compose v2 (recommended path for compliance checks)
+- Or locally: Node matching `.node-version`, pnpm `10.33.0`, Bun matching `.bun-version`
+
+### Docker Compose (ports 4567 + 3000)
+
+```bash
+docker compose up --build -d --wait
+```
+
+- Frontend: http://localhost:3000  
+- Backend: http://localhost:4567  
+- Optional Collector: `docker compose --profile observability up -d`
+
+Smoke from a clean volume:
+
+```bash
+docker compose down -v
+pnpm compose:smoke
+```
+
+Stop:
+
+```bash
+docker compose down
+```
+
+### Local development
+
+```bash
+pnpm install
+pnpm --filter @markr/backend db:migrate
+pnpm --filter @markr/backend dev   # :4567
+pnpm --filter @markr/frontend dev  # :3000, proxies to BACKEND_URL
+```
+
+Useful checks:
+
+```bash
+pnpm validate
+pnpm test:integration
+pnpm storybook:build
+pnpm react:doctor
+```
+
+Example scanner-style import (also see [`task/example-requests.sh`](task/example-requests.sh)):
+
+```bash
+curl -i -X POST http://localhost:4567/import \
+  -H 'Content-Type: text/xml+markr' \
+  --data-binary @task/sample_results.xml
+```
+
+## Performance notes
+
+Aggregate and histogram endpoints read pre-normalized stored marks and compute percentage rows in a single SQL pass before applying percentile/stddev/binning in process. That keeps hot paths off full-table XML reparse and avoids buffering large imports in memory. For Town Hall projection scale, the next wins are PostgreSQL (or a read replica), tighter indexes on `test_id`, and optional materialized rollups if import volume grows beyond a single SQLite writer. Polling with ETags keeps the dashboard live without pushing every unchanged payload to the browser.
+
+## Manual Safari / VoiceOver checklist
+
+Chromium automation covers Storybook interactions and axe checks. Before reviewer handoff, verify in Safari with VoiceOver:
+
+- [ ] Upload page: heading, labelled file input, disabled Upload until valid file, alert vs status regions
+- [ ] Tests list: empty and populated table, keyboard navigation to test links, stale/recovery announcements announced once
+- [ ] Detail: aggregate labels/units, ten histogram bars with accessible names, not-found path
+- [ ] Focus rings visible; reduced-motion preference respected
+- [ ] Light and dark system appearances remain readable
+
+## Repository map
+
+- [`PLAN.md`](PLAN.md) — plan and todo list
+- [`REQUIREMENTS.md`](REQUIREMENTS.md) — product requirements
+- [`ARCHITECTURE.md`](ARCHITECTURE.md) — implementation architecture
+- [`NOTES.md`](NOTES.md) — decisions and trade-offs
+- [`AGENTS.md`](AGENTS.md) — agent guidance
+- [`task/`](task/) — immutable brief and fixtures

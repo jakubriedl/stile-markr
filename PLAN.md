@@ -28,6 +28,7 @@ The task brief is available in [`task/README.md`](task/README.md).
 - [ ] Complete full acceptance and submission documentation.
   - Run Oxc, typechecking, coverage, backend integration, Storybook, production builds, React Doctor, Docker/Compose smoke, adversarial review, and destructive built-in-browser E2E.
   - Complete the manual Safari/VoiceOver checklist and finalize README assumptions, approach, highlights, run instructions, performance notes, and required joke phrase.
+  - README delivery (DEL-002/DEL-003) and clean-volume Compose smoke are done; browser E2E and Safari/VoiceOver remain.
 
 ## Implementation wave checklist
 
@@ -51,7 +52,8 @@ The task brief is available in [`task/README.md`](task/README.md).
 
 - [x] Add reviewed non-root images, migration/backend/frontend Compose ordering, persistence, and optional Collector configuration.
 - [x] Add reviewed least-privilege CI, quality/smoke jobs, and coverage/Storybook artifacts.
-- [ ] Run clean-volume Compose smoke and authorized destructive browser acceptance.
+- [x] Run clean-volume Compose smoke.
+- [ ] Run authorized destructive browser acceptance (`markr-browser-e2e`).
 - [ ] Complete manual Safari/VoiceOver checks, documentation, final adversarial review, and reviewer handoff.
 
 <!-- Extend this list with implementation and other todo items as they are discovered. -->

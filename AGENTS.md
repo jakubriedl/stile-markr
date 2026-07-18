@@ -2,7 +2,7 @@
 
 ## Repository status
 
-This is a greenfield repository with clarified requirements and a designed architecture. Application implementation has not started.
+Application implementation is in progress on `main`, with Compose/CI landed and full acceptance remaining.
 
 ## Repository map
 

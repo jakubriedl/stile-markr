@@ -12,6 +12,7 @@ export {
   type ResultsDatabase,
   type TestListItem,
 } from "./queries.ts";
+export { createResultsRoutes, type ResultsRouteDependencies } from "./routes.ts";
 export {
   HISTOGRAM_BOUNDS,
   aggregateFromPercentages,

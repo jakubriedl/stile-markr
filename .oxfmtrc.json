@@ -3,6 +3,7 @@
     "**/.output/**",
     "**/coverage/**",
     "**/dist/**",
+    "**/drizzle/meta/**",
     "**/node_modules/**",
     "**/routeTree.gen.ts",
     "**/storybook-static/**"

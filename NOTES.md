@@ -111,6 +111,85 @@ Independent analysis of `task/sample_results.xml` found 100 result elements for 
 
 All 100 summary values match their answer sums, but answers remain non-authoritative. The fixture does not exercise malformed records, extra fields, varying available marks, perfect scores, multiple tests, or answer/summary disagreement, so those fixture absences must not be generalized into requirements.
 
+<a id="note-arch-001"></a>
+### NOTE-ARCH-001 — Workspace, toolchain, and runtime
+
+The application will use a pnpm workspace with Turborepo. Both `/frontend` and `/backend` are ESM-only TypeScript projects using a shared strict configuration with `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, and `noImplicitOverride`. Oxc will provide formatting and linting. Dependency ranges may use normal semver ranges, with the committed pnpm lockfile providing reproducibility. Node, Bun, and pnpm versions will also be recorded through `packageManager`, `engines`, `.node-version`, and `.bun-version`.
+
+Bun is the preferred runtime for both services so their operational model remains consistent. A serial foundation spike must prove TanStack Start SSR, Hono/Drizzle, the real-process Vitest harness, evlog, and OpenTelemetry context propagation. If Bun fails for either service, both services switch to Node LTS; the database driver then switches from `bun:sqlite` to Drizzle's `node:sqlite` adapter. A split-runtime deployment is deliberately avoided.
+
+<a id="note-arch-002"></a>
+### NOTE-ARCH-002 — Frontend service and data boundary
+
+TanStack Start will server-render the initial routes and data, then hydrate in the browser. Server loaders call the Hono backend directly over the internal network. Hydrated browser code calls same-origin `/api/*` routes on the frontend service; the proxy strips `/api`, streams bodies and responses without parsing, forwards only required headers plus request/trace context, and applies origin and timeout protections. The Hono app type is the TypeScript contract through Hono RPC rather than a separate contracts package or generated OpenAPI client.
+
+TanStack Query owns SSR prefetch/dehydration, cache state, five-second polling, retries, and stale state. Aggregate and histogram requests may be eventually consistent across a commit boundary; that transient mismatch is accepted. Each endpoint still emits an ETag and supports `If-None-Match`/304. SSR and browser presentation use fixed `en-AU` formatting, and refresh timestamps are displayed in explicitly labelled UTC to prevent hydration differences.
+
+<a id="note-arch-003"></a>
+### NOTE-ARCH-003 — Frontend structure and visual system
+
+Frontend code is feature-first: thin route definitions compose page components, reusable primitives live under `components/ui`, and stories/tests/mocks are colocated with the owned component or feature. React Aria Components provide interaction primitives; Tailwind and `tailwind-variants` style their state attributes.
+
+The visual direction is restrained rather than technocratic: warm-neutral surfaces, a muted blue accent, system typography, generous whitespace, subtle borders, and no gradients or glass effects. A CSS-tokenized light theme and system-driven dark theme must both meet WCAG 2.2 AA. The histogram uses semantic HTML, a list/figure structure, and CSS Grid bars rather than a chart dependency.
+
+Storybook uses the dedicated TanStack framework. Every reusable component and every meaningful page state gets a story backed by shared MSW v2 fixtures. Story interaction tests run through Storybook's Vitest browser integration with axe violations treated as failures. CI retains a static Storybook artifact. Automated visual regression is deferred; Chromatic is the intended future service.
+
+<a id="note-arch-004"></a>
+### NOTE-ARCH-004 — Backend and streaming import pipeline
+
+The backend uses Hono with feature-first `import`, `results`, and `health` modules. Route handlers remain thin, Zod validates configuration and normalized record boundaries, and `createApp(dependencies)` stays separate from the runtime listener.
+
+Imports use `saxes` over a bounded, fatal UTF-8 stream decoder. The architecture does not add a stricter DTD/entity policy beyond the parser's defaults. A dedicated worker owns the write connection, parser state, and serialized import transactions so the main event loop can keep serving reads. Request chunks cross a bounded handoff with backpressure. The worker opens one transaction for the streamed document, writes normalized records directly, tracks unique request keys in temporary database state, and rolls everything back on malformed XML, validation failure, cancellation, or size overflow.
+
+One import may run while four wait in a finite queue. Further requests receive 503 with `Retry-After`; the finite limit replaces the initially considered unbounded queue because queued streams otherwise create a connection and memory denial-of-service risk. Imports have a configurable 120-second timeout; query and proxy operations default to ten seconds. The worker is part of readiness and graceful shutdown.
+
+<a id="note-arch-005"></a>
+### NOTE-ARCH-005 — Persistence and analytical queries
+
+The initial implementation is intentionally SQLite-specific, not falsely advertised as a drop-in PostgreSQL adapter. Drizzle uses `bun:sqlite` under the preferred runtime, a composite `(test_id, student_number)` key, database checks, atomic independent-maximum upserts, and a persistent local volume. A one-shot migration service must complete before the backend starts. SQLite runs with WAL, foreign keys, busy timeout, and `synchronous=NORMAL`.
+
+Aggregate, Type 7 percentile, list, and histogram work is performed with optimized SQLite SQL and Drizzle SQL interfaces where practical. SQLite math/window queries are covered by exact integration oracles. Comments and architecture documentation identify SQL or schema constructs that must change for PostgreSQL. A real production migration requires PostgreSQL-specific schema/migrations, `greatest`-style upserts, percentile SQL, connection pooling, repository contract tests, and removal of the in-process single-writer assumption.
+
+<a id="note-arch-006"></a>
+### NOTE-ARCH-006 — Observability and HTTP security
+
+Both runtime services use evlog with environment-controlled log levels, request-scoped wide events, and OTLP integration. OpenTelemetry provides traces and metrics; evlog supplies structured logs to the same optional Collector profile. W3C trace context and an accepted-or-generated `x-request-id` flow through the frontend proxy to Hono and appear in redacted logs.
+
+Instrumentation includes HTTP/proxy spans and bounded-cardinality spans or metrics for XML parsing, import queueing, transaction/upsert, aggregate queries, import outcomes, and refresh failures. XML, names, student numbers, unrestricted URLs, and error payloads must never enter logs, spans, or metric labels. Telemetry export is not a health dependency and must flush with a bounded shutdown timeout.
+
+Baseline HTTP protection includes CSP/security headers, explicit same-origin checks on the frontend proxy, no backend CORS, request/body timeouts, and PII redaction. The optional Compose observability profile supplies an OpenTelemetry Collector; the core application must remain healthy without it.
+
+<a id="note-arch-007"></a>
+### NOTE-ARCH-007 — Testing, browser acceptance, and CI
+
+Vitest unit tests cover isolated domain, parser-state, validation, data, and UI logic. Backend integration tests run Vitest under supported Node tooling, spawn the actual selected service runtime on an ephemeral port, migrate a fresh temporary SQLite file, call real HTTP endpoints, and tear down the process and database. Critical domain/import logic requires 90% branch coverage; overall tested backend/frontend code requires 80%.
+
+Storybook browser tests cover interactions and accessibility. Full product E2E is intentionally a project Cursor skill using the built-in browser rather than a committed Playwright suite. A complete run warns that it will reset the normal Compose volume, starts from empty state, and covers every route, valid and invalid upload guards, loading/error/not-found/stale/recovery behavior, live updates, keyboard/focus, reduced motion, accessibility-tree output, responsive layouts, and browser console/network failures.
+
+GitHub Actions will run frozen installation, Oxc, typechecking, unit/integration coverage, Storybook tests/build, application builds, API/Compose smoke checks, and upload the static Storybook artifact. React Doctor remains a local review gate rather than a CI integration. Browser support targets current Chromium, Firefox, and Safari; automated browser checks use Chromium and final acceptance includes a manual Safari/VoiceOver pass.
+
+<a id="note-arch-008"></a>
+### NOTE-ARCH-008 — Agent skills and React Doctor
+
+All agent skills are project-local and committed. The curated third-party set is:
+
+- official React Aria guidance;
+- Vercel React best practices;
+- unofficial TanStack Start best practices, always checked against Context7 and pinned project docs;
+- Vitest and MSW best practices from `pproenca/dot-skills`; and
+- WCAG 2.2 accessibility compliance guidance.
+
+Markr-specific skills cover stack alignment, adversarial requirement review, and destructive built-in-browser E2E. React Doctor follows its documented order only after the frontend scaffold exists: run `npx react-doctor@latest`, then `npx react-doctor@latest install`. Its default telemetry remains enabled, it is installed project-locally, and it becomes a recurring frontend review gate without its CI integration.
+
+<a id="note-arch-009"></a>
+### NOTE-ARCH-009 — Parallel agents, review, and model policy
+
+The earlier direct-to-`main` note described solo work before CI and concurrent agents. Parallel implementation changes that constraint: each focused implementation agent now works on a temporary `agent/<wave>/<lane>` branch in an isolated worktree with exclusive path ownership. Only the integrator may edit root manifests, the lockfile, migrations, generated entrypoints, or shared composition files. Feature agents must request dependencies rather than edit manifests.
+
+Validated focused commits are cherry-picked onto `main`, preserving a linear history, and temporary worktrees/branches are removed. A fresh read-only adversarial reviewer runs after every agent change and again after fixes. Integration is blocked by requirement mismatches, failing checks, critical/high findings, or unresolved medium findings unless accepted debt is explicitly recorded.
+
+GPT-5.6 Sol Extra High is the parent orchestrator, integration owner, conflict resolver, and mandatory adversarial reviewer. GPT-5.6 Terra Medium handles narrow implementation lanes. A lane escalates to Sol Extra High only for an unresolved blocker or repeated review failure.
+
 <!--
 ### YYYY-MM-DD — Short title
 

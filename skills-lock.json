@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "skills": {
+    "accessibility-compliance": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/ui-design/skills/accessibility-compliance/SKILL.md",
+      "computedHash": "e76877abeed83f3751d1e18c8205f02c8b5d3e7cc2e060670805b449f6faefdb"
+    },
+    "msw": {
+      "source": "pproenca/dot-skills",
+      "sourceType": "github",
+      "skillPath": "skills/.curated/msw/SKILL.md",
+      "computedHash": "2a8ef7934bbda4992bd1ee44e521922768e55ae7134dfc668efd5cf88bfe4b40"
+    },
+    "react-aria": {
+      "source": "react-aria.adobe.com",
+      "sourceType": "well-known",
+      "computedHash": "c778864aedee25fb7dfe980f772954e13ac76cdf3ff00879dd59b72621d797ae"
+    },
+    "tanstack-start-best-practices": {
+      "source": "deckardger/tanstack-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/tanstack-start/SKILL.md",
+      "computedHash": "8b073187405a10f9997158f9139a9664cc801595d2fe63d542a0bac9bf2152f5"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/react-best-practices/SKILL.md",
+      "computedHash": "ca7b0c0c6e5f2750043f7f0cd72d16ac4e2abc48f9b5500d047a4b77a2506212"
+    },
+    "vitest": {
+      "source": "pproenca/dot-skills",
+      "sourceType": "github",
+      "skillPath": "skills/.curated/vitest/SKILL.md",
+      "computedHash": "2432cb7f9099423fb3768a925fa95d7f8a6dc56c76eaded47472f558bff7139e"
+    }
+  }
+}

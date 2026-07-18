@@ -355,7 +355,7 @@ Comments and narrative in supporting files are not requirements unless this docu
 - **NFR-006 (Deferred):** Production authentication, authorization, TLS, rate limiting, broader observability, backup, recovery, and capacity targets require future product and architecture work.
   Decision context: [`NOTE-REQ-006`](NOTES.md#note-req-006), [`NOTE-REQ-008`](NOTES.md#note-req-008).
 
-## 15. Supplied fixture acceptance facts
+## 15. Derived fixture acceptance oracles
 
 These facts are acceptance oracles for [`task/sample_results.xml`](task/sample_results.xml), not general limits on valid input.
 

@@ -41,4 +41,3 @@ describe("reduceRefreshState", () => {
     expect(cleared.phase).toBe("stale");
   });
 });
-

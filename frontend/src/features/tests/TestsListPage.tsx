@@ -1,5 +1,6 @@
 import { Alert } from "../../components/ui/Alert.tsx";
 import { Link } from "../../components/ui/Link.tsx";
+import { formatLastRefreshedUtc } from "../../lib/live-state/displayed-snapshots.ts";
 
 export type TestListItemView = {
   test_id: string;
@@ -31,7 +32,7 @@ export function TestsListPage({
       <header className="flex flex-col gap-2">
         <h1 className="m-0 font-[family-name:var(--markr-font-display)] text-3xl">Tests</h1>
         <p className="m-0 text-sm text-[var(--markr-fg-muted)]">
-          Last refreshed: {lastRefreshedAt ?? "Not yet refreshed"}
+          Last refreshed: {formatLastRefreshedUtc(lastRefreshedAt)}
           {stale ? " (stale)" : ""}
         </p>
       </header>

@@ -7,6 +7,11 @@ import type { EtagCacheEntry } from "../lib/api/etag-fetch.ts";
 import { createMarkrApi } from "../lib/api/markr-api.ts";
 import { QUERY_POLL_INTERVAL_MS, queryKeys } from "../lib/api/query-keys.ts";
 import type { AggregateResponse, HistogramResponse } from "../lib/api/types.ts";
+import {
+  detailChangeAnnouncement,
+  fingerprintTestDetail,
+  syncRefreshFromPoll,
+} from "../lib/live-state/displayed-snapshots.ts";
 import { initialRefreshState, reduceRefreshState } from "../lib/live-state/refresh-state.ts";
 
 export const Route = createFileRoute("/tests/$testId")({
@@ -20,7 +25,7 @@ function TestDetailRoute() {
   const aggregateCache = useRef<EtagCacheEntry<AggregateResponse> | null>(null);
   const histogramCache = useRef<EtagCacheEntry<HistogramResponse> | null>(null);
   const [refresh, dispatch] = useReducer(reduceRefreshState, initialRefreshState);
-  const previousCount = useRef<number | null>(null);
+  const previousFingerprint = useRef<string | null>(null);
 
   const [aggregateQuery, histogramQuery] = useQueries({
     queries: [
@@ -63,28 +68,33 @@ function TestDetailRoute() {
   const isError = aggregateQuery.isError || histogramQuery.isError;
 
   useEffect(() => {
-    if (isError) {
-      dispatch({ type: "failure" });
-      return;
-    }
-    if (aggregateQuery.data) {
-      const count = aggregateQuery.data.count;
-      const changed =
-        previousCount.current != null && previousCount.current !== count
-          ? `Results were updated. ${count} students.`
-          : null;
-      previousCount.current = count;
-      dispatch(
-        changed
-          ? {
-              type: "success",
-              at: new Date().toISOString(),
-              changedAnnouncement: changed,
-            }
-          : { type: "success", at: new Date().toISOString() },
-      );
-    }
-  }, [aggregateQuery.data, isError, aggregateQuery.dataUpdatedAt]);
+    const fingerprint =
+      aggregateQuery.data && histogramQuery.data
+        ? fingerprintTestDetail(aggregateQuery.data, histogramQuery.data.bins)
+        : null;
+    const synced = syncRefreshFromPoll({
+      isError,
+      fingerprint,
+      previousFingerprint: previousFingerprint.current,
+      changedAnnouncement:
+        fingerprint == null || aggregateQuery.data == null
+          ? null
+          : detailChangeAnnouncement(
+              previousFingerprint.current,
+              fingerprint,
+              aggregateQuery.data.count,
+            ),
+      at: new Date().toISOString(),
+    });
+    previousFingerprint.current = synced.nextFingerprint;
+    dispatch(synced.event);
+  }, [
+    aggregateQuery.data,
+    histogramQuery.data,
+    isError,
+    aggregateQuery.dataUpdatedAt,
+    histogramQuery.dataUpdatedAt,
+  ]);
 
   return (
     <TestDetailPage

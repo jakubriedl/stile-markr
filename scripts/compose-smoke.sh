@@ -35,11 +35,12 @@ if [[ -f "$SAMPLE_XML" ]]; then
       -H "Content-Type: text/xml+markr" \
       --data-binary @"$SAMPLE_XML"
   )"
-  printf '%s' "$import_response" | grep -q '"imported"'
+  test "$import_response" = '{"imported":81}'
 
   echo "Verifying test list after import..."
   tests_response="$(curl -fsS "$FRONTEND_URL/api/tests")"
-  printf '%s' "$tests_response" | grep -q '"test_id"'
+  printf '%s' "$tests_response" | grep -q '"test_id":"9863"'
+  printf '%s' "$tests_response" | grep -q '"student_count":81'
 fi
 
 echo "Compose/API smoke checks passed."

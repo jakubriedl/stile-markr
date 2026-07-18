@@ -3,10 +3,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useReducer, useRef } from "react";
 
 import { TestsListPage } from "../features/tests/TestsListPage.tsx";
+import type { EtagCacheEntry } from "../lib/api/etag-fetch.ts";
 import { createMarkrApi } from "../lib/api/markr-api.ts";
 import { QUERY_POLL_INTERVAL_MS, queryKeys } from "../lib/api/query-keys.ts";
 import type { TestsResponse } from "../lib/api/types.ts";
-import type { EtagCacheEntry } from "../lib/api/etag-fetch.ts";
+import {
+  fingerprintTestsList,
+  listChangeAnnouncement,
+  syncRefreshFromPoll,
+} from "../lib/live-state/displayed-snapshots.ts";
 import { initialRefreshState, reduceRefreshState } from "../lib/live-state/refresh-state.ts";
 
 export const Route = createFileRoute("/tests/")({
@@ -18,7 +23,7 @@ const api = createMarkrApi();
 function TestsRoute() {
   const cacheRef = useRef<EtagCacheEntry<TestsResponse> | null>(null);
   const [refresh, dispatch] = useReducer(reduceRefreshState, initialRefreshState);
-  const previousCount = useRef<number | null>(null);
+  const previousFingerprint = useRef<string | null>(null);
 
   const query = useQuery({
     queryKey: queryKeys.tests,
@@ -36,27 +41,23 @@ function TestsRoute() {
   });
 
   useEffect(() => {
-    if (query.isError) {
-      dispatch({ type: "failure" });
-      return;
-    }
-    if (query.data) {
-      const count = query.data.tests.length;
-      const changed =
-        previousCount.current != null && previousCount.current !== count
-          ? `Test list updated. ${count} tests available.`
-          : null;
-      previousCount.current = count;
-      dispatch(
-        changed
-          ? {
-              type: "success",
-              at: new Date().toISOString(),
-              changedAnnouncement: changed,
-            }
-          : { type: "success", at: new Date().toISOString() },
-      );
-    }
+    const fingerprint = query.data ? fingerprintTestsList(query.data.tests) : null;
+    const synced = syncRefreshFromPoll({
+      isError: query.isError,
+      fingerprint,
+      previousFingerprint: previousFingerprint.current,
+      changedAnnouncement:
+        fingerprint == null
+          ? null
+          : listChangeAnnouncement(
+              previousFingerprint.current,
+              fingerprint,
+              query.data?.tests.length ?? 0,
+            ),
+      at: new Date().toISOString(),
+    });
+    previousFingerprint.current = synced.nextFingerprint;
+    dispatch(synced.event);
   }, [query.data, query.isError, query.dataUpdatedAt]);
 
   return (

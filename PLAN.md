@@ -54,7 +54,8 @@ The task brief is available in [`task/README.md`](task/README.md).
 - [x] Add reviewed least-privilege CI, quality/smoke jobs, and coverage/Storybook artifacts.
 - [x] Run clean-volume Compose smoke.
 - [x] Run authorized destructive browser acceptance (`markr-browser-e2e`).
-- [ ] Complete manual Safari/VoiceOver checks (checklist in README), final adversarial review, and reviewer handoff.
+- [ ] Complete manual Safari/VoiceOver checks (checklist in README), final adversarial review (Grok 4.5), and reviewer handoff.
+  - Accepted debt: SSR Query hydration deferred — [`NOTE-ARCH-010`](NOTES.md#note-arch-010).
 
 <!-- Extend this list with implementation and other todo items as they are discovered. -->
 

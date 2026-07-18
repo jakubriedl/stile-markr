@@ -13,6 +13,7 @@ I considered using feature branches but decided to commit directly to `main` for
 Revisit this decision when collaboration begins or CI is introduced.
 
 <a id="note-req-001"></a>
+
 ### NOTE-REQ-001 — Embedded directives and jokes
 
 The task materials mix requirements with jokes and instructions hidden in comments.
@@ -24,6 +25,7 @@ The task materials mix requirements with jokes and instructions hidden in commen
 - Ignore rules from `task/.gitignore` should be carried over only where relevant to the eventual stack, with secrets and local data always excluded.
 
 <a id="note-req-002"></a>
+
 ### NOTE-REQ-002 — Import validity and manual entry
 
 An empty `<mcq-test-results>` document is assumed to indicate a bad or incomplete scan and should be rejected. It does not represent a student who left every answer blank: that case is a valid result record with positive `available` marks and `obtained="0"`, producing 0%.
@@ -43,6 +45,7 @@ Import validation decisions:
 - Invalid documents receive 400 atomically, without retaining any part. Unexpected service or persistence faults use 500-class responses rather than being misreported as client errors.
 
 <a id="note-req-003"></a>
+
 ### NOTE-REQ-003 — Identity and deduplication
 
 Student numbers and test IDs deliberately have different semantics:
@@ -55,6 +58,7 @@ Student numbers and test IDs deliberately have different semantics:
 For rescans, maximum `obtained` and maximum `available` are retained independently, even when that combination did not appear in one scan. The import response counts unique student-test pairs in the accepted request, not raw XML elements or changes to previously retained state.
 
 <a id="note-req-004"></a>
+
 ### NOTE-REQ-004 — Retained metadata and privacy
 
 The retained result includes first name, last name, and scan timestamp in addition to identity and summary marks. Names are independently optional; when present, each is trimmed and must contain non-empty Unicode text.
@@ -64,6 +68,7 @@ A present `scanned-on` value must be an ISO 8601 date-time with `Z` or an explic
 Results remain until persistent storage is explicitly removed; no deletion feature or automatic expiry is required. Individual student data must not be exposed through the API or frontend, and request XML, names, and student numbers must not be written to logs.
 
 <a id="note-req-005"></a>
+
 ### NOTE-REQ-005 — Statistics and distributions
 
 - Aggregate standard deviation is the population standard deviation.
@@ -75,6 +80,7 @@ Results remain until persistent storage is explicitly removed; no deletion featu
 - A test's `marks_available` is the maximum retained available-mark value among its students.
 
 <a id="note-req-006"></a>
+
 ### NOTE-REQ-006 — Persistence, scale, and operations
 
 Imported data must survive backend process/container restarts and an ordinary `docker compose down` followed by `docker compose up`. Explicit removal of persistent storage may erase it.
@@ -84,6 +90,7 @@ Performance acceptance is limited to the supplied fixture scale. There is no num
 Full metrics and tracing are out of scope, but the backend should expose `GET /health` as a readiness check: it reports 200 only when the service and persistence are ready, and 503 otherwise. Rate limiting is a production consideration rather than a requirement for this task.
 
 <a id="note-req-007"></a>
+
 ### NOTE-REQ-007 — Frontend behavior and accessibility
 
 - The upload and list headings should be exactly `Upload exam results` and `Tests`.
@@ -98,6 +105,7 @@ Full metrics and tracing are out of scope, but the backend should expose `GET /h
 - The frontend must conform to WCAG 2.2 AA, support keyboard-only operation with visible focus, and honor reduced-motion preferences.
 
 <a id="note-req-008"></a>
+
 ### NOTE-REQ-008 — Authentication and transport security
 
 I considered authentication but decided not to include it because it is not described by the task and keeping the supplied surface unchanged is more likely to pass the base test suite. If authentication were in scope, I would consider BetterAuth for both human and machine access.
@@ -105,6 +113,7 @@ I considered authentication but decided not to include it because it is not desc
 All task routes and endpoints are therefore unauthenticated. TLS termination is also outside this deliverable, matching the brief. These are scope decisions, not claims that authentication and TLS would be unnecessary in production.
 
 <a id="note-req-009"></a>
+
 ### NOTE-REQ-009 — Sample-data observations
 
 Independent analysis of `task/sample_results.xml` found 100 result elements for test `9863`, 81 unique student-test pairs, and 19 duplicate pairs. All 19 duplicates have conflicting names, seven later scans have lower scores, and two student numbers contain leading zeroes. These details reinforce deduplication by numeric student number plus test ID, never by name or latest arrival.
@@ -112,6 +121,7 @@ Independent analysis of `task/sample_results.xml` found 100 result elements for 
 All 100 summary values match their answer sums, but answers remain non-authoritative. The fixture does not exercise malformed records, extra fields, varying available marks, perfect scores, multiple tests, or answer/summary disagreement, so those fixture absences must not be generalized into requirements.
 
 <a id="note-arch-001"></a>
+
 ### NOTE-ARCH-001 — Workspace, toolchain, and runtime
 
 The application will use a pnpm workspace with Turborepo. Both `/frontend` and `/backend` are ESM-only TypeScript projects using a shared strict configuration with `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, and `noImplicitOverride`. Oxc will provide formatting and linting. Dependency ranges may use normal semver ranges, with the committed pnpm lockfile providing reproducibility. Node, Bun, and pnpm versions will also be recorded through `packageManager`, `engines`, `.node-version`, and `.bun-version`.
@@ -121,6 +131,7 @@ Bun is the preferred runtime for both services so their operational model remain
 The foundation compatibility gate completed on 2026-07-18 with Bun 1.3.11 selected for both services. Executable checks prove raw TanStack Start SSR before hydration, progressive request and response forwarding through the Nitro proxy, an initialized proxy child span under Bun, Hono RPC type export and frontend consumption, Drizzle transactions and WAL through `bun:sqlite`, Node-hosted Vitest spawning and stopping the Bun backend, evlog drains under Bun, OpenTelemetry asynchronous Hono context, and W3C trace propagation across a Bun worker. These checks remain under `tests/runtime` as regression probes rather than production source or one-off experiments.
 
 <a id="note-arch-002"></a>
+
 ### NOTE-ARCH-002 — Frontend service and data boundary
 
 TanStack Start will server-render the initial routes and data, then hydrate in the browser. Server loaders call the Hono backend directly over the internal network. Hydrated browser code calls same-origin `/api/*` routes on the frontend service; the proxy strips `/api`, streams bodies and responses without parsing, forwards only required headers plus request/trace context, and applies origin and timeout protections. The Hono app type is the TypeScript contract through Hono RPC rather than a separate contracts package or generated OpenAPI client.
@@ -128,6 +139,7 @@ TanStack Start will server-render the initial routes and data, then hydrate in t
 TanStack Query owns SSR prefetch/dehydration, cache state, five-second polling, retries, and stale state. Aggregate and histogram requests may be eventually consistent across a commit boundary; that transient mismatch is accepted. Each endpoint still emits an ETag and supports `If-None-Match`/304. SSR and browser presentation use fixed `en-AU` formatting, and refresh timestamps are displayed in explicitly labelled UTC to prevent hydration differences.
 
 <a id="note-arch-003"></a>
+
 ### NOTE-ARCH-003 — Frontend structure and visual system
 
 Frontend code is feature-first: thin route definitions compose page components, reusable primitives live under `components/ui`, and stories/tests/mocks are colocated with the owned component or feature. React Aria Components provide interaction primitives; Tailwind and `tailwind-variants` style their state attributes.
@@ -137,6 +149,7 @@ The visual direction is restrained rather than technocratic: warm-neutral surfac
 Storybook uses the dedicated TanStack framework. Every reusable component and every meaningful page state gets a story backed by shared MSW v2 fixtures. Story interaction tests run through Storybook's Vitest browser integration with axe violations treated as failures. CI retains a static Storybook artifact. Automated visual regression is deferred; Chromatic is the intended future service.
 
 <a id="note-arch-004"></a>
+
 ### NOTE-ARCH-004 — Backend and streaming import pipeline
 
 The backend uses Hono with feature-first `import`, `results`, and `health` modules. Route handlers remain thin, Zod validates configuration and normalized record boundaries, and `createApp(dependencies)` stays separate from the runtime listener.
@@ -146,6 +159,7 @@ Imports use `saxes` over a bounded, fatal UTF-8 stream decoder. The architecture
 One import may run while four wait in a finite queue. Further requests receive 503 with `Retry-After`; the finite limit replaces the initially considered unbounded queue because queued streams otherwise create a connection and memory denial-of-service risk. Imports have a configurable 120-second timeout; query and proxy operations default to ten seconds. The worker is part of readiness and graceful shutdown.
 
 <a id="note-arch-005"></a>
+
 ### NOTE-ARCH-005 — Persistence and analytical queries
 
 The initial implementation is intentionally SQLite-specific, not falsely advertised as a drop-in PostgreSQL adapter. Drizzle uses `bun:sqlite` under the preferred runtime, a composite `(test_id, student_number)` key, database checks, atomic independent-maximum upserts, and a persistent local volume. A one-shot migration service must complete before the backend starts. SQLite runs with WAL, foreign keys, busy timeout, and `synchronous=NORMAL`.
@@ -153,6 +167,7 @@ The initial implementation is intentionally SQLite-specific, not falsely adverti
 Aggregate, Type 7 percentile, list, and histogram work is performed with optimized SQLite SQL and Drizzle SQL interfaces where practical. SQLite math/window queries are covered by exact integration oracles. Comments and architecture documentation identify SQL or schema constructs that must change for PostgreSQL. A real production migration requires PostgreSQL-specific schema/migrations, `greatest`-style upserts, percentile SQL, connection pooling, repository contract tests, and removal of the in-process single-writer assumption.
 
 <a id="note-arch-006"></a>
+
 ### NOTE-ARCH-006 — Observability and HTTP security
 
 Both runtime services use evlog with environment-controlled log levels, request-scoped wide events, and OTLP integration. OpenTelemetry provides traces and metrics; evlog supplies structured logs to the same optional Collector profile. W3C trace context and an accepted-or-generated `x-request-id` flow through the frontend proxy to Hono and appear in redacted logs.
@@ -162,6 +177,7 @@ Instrumentation includes HTTP/proxy spans and bounded-cardinality spans or metri
 Baseline HTTP protection includes CSP/security headers, explicit same-origin checks on the frontend proxy, no backend CORS, request/body timeouts, and PII redaction. The optional Compose observability profile supplies an OpenTelemetry Collector; the core application must remain healthy without it.
 
 <a id="note-arch-007"></a>
+
 ### NOTE-ARCH-007 — Testing, browser acceptance, and CI
 
 Vitest unit tests cover isolated domain, parser-state, validation, data, and UI logic. Backend integration tests run Vitest under supported Node tooling, spawn the actual selected service runtime on an ephemeral port, migrate a fresh temporary SQLite file, call real HTTP endpoints, and tear down the process and database. Critical domain/import logic requires 90% branch coverage; overall tested backend/frontend code requires 80%. Coverage excludes only the minimal Bun process entrypoint and the Drizzle migration executable: lifecycle behavior is extracted into covered production code, migration behavior is exercised against fresh SQLite databases, generated migrations are reviewed separately, and runtime probes live under `tests`.
@@ -172,9 +188,16 @@ GitHub Actions will run frozen installation, Oxc, typechecking, unit/integration
 
 Docker images install with pnpm (`--frozen-lockfile`) and serve with Bun. Backend images use `pnpm deploy --legacy` so production containers receive an isolated package tree without enabling workspace package injection. Compose starts migrate → healthy backend → frontend against a named SQLite volume; the optional `observability` profile runs a debug OpenTelemetry Collector that is not a readiness dependency. Local smoke: `pnpm compose:smoke` (requires a running Docker daemon).
 
-Acceptance evidence (through `c4c19a2`): clean-volume Compose smoke passed; Playwright Chromium exercised the sample XML UI upload (Cursor built-in browser cannot attach host filesystem files or fetch host fixture servers); Cursor browser verified list/detail oracles, live count update to 82, stale announcement after backend stop (~8.5s), and recovery announcement after restart. List/detail polling uses `retry: 1` so outages can reach `isError`/stale UI (infinite `retry: true` never settled). Safari/VoiceOver remains a manual checklist in `README.md`.
+<a id="note-arch-010"></a>
+
+### NOTE-ARCH-010 — Accepted debt: SSR Query hydration
+
+TanStack Query SSR loaders/`ensureQueryData` dehydration for list/detail are deferred. Composed routes currently hydrate on the client after SSR shells render. Residual risk: brief empty/stale first paint and an immediate client refetch. Revisit before production hardening; tracked against ARCHITECTURE §7.1–7.3.
+
+Acceptance evidence (through Wave 4 adversarial fixes): clean-volume Compose smoke passed; Playwright Chromium exercised the sample XML UI upload (Cursor built-in browser cannot attach host filesystem files or fetch host fixture servers); Cursor browser verified list/detail oracles, live count update to 82, stale announcement after backend stop (~8.5s), and recovery announcement after restart. List/detail polling uses `retry: 1` so outages can reach `isError`/stale UI (infinite `retry: true` never settled). Safari/VoiceOver remains a manual checklist in `README.md`.
 
 <a id="note-arch-008"></a>
+
 ### NOTE-ARCH-008 — Agent skills and React Doctor
 
 All agent skills are project-local and committed. The curated third-party set is:
@@ -188,6 +211,7 @@ All agent skills are project-local and committed. The curated third-party set is
 Markr-specific skills cover stack alignment, adversarial requirement review, and destructive built-in-browser E2E. React Doctor follows its documented order only after the frontend scaffold exists: run `npx react-doctor@latest`, then `npx react-doctor@latest install`. Its default telemetry remains enabled, it is installed project-locally, and it becomes a recurring frontend review gate without its CI integration.
 
 <a id="note-arch-009"></a>
+
 ### NOTE-ARCH-009 — Parallel agents, review, and model policy
 
 The earlier direct-to-`main` note described solo work before CI and concurrent agents. Parallel implementation changes that constraint: each focused implementation agent now works on a temporary `agent/<wave>/<lane>` branch in an isolated worktree with exclusive path ownership. Only the integrator may edit root manifests, the lockfile, migrations, generated entrypoints, or shared composition files. Feature agents must request dependencies rather than edit manifests.

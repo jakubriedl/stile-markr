@@ -54,7 +54,7 @@ describe("TestDetailPage", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Test 9863" })).toBeInTheDocument();
-    expect(screen.getByText(/\(stale\)/)).toBeInTheDocument();
+    expect(screen.getByText(/2026-07-18T10:00:00.000Z UTC \(stale\)/)).toBeInTheDocument();
     expect(screen.getByText(/Connection restored/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Aggregate statistics" })).toBeInTheDocument();
     expect(screen.getByLabelText("Mean 50.00% percent")).toBeInTheDocument();

@@ -8,7 +8,7 @@ Joke acknowledgment (not a real endorsement): Endorsed by the Taylor Swift Fan C
 
 - Bun is the process runtime for both services after the compatibility gate; pnpm remains the only package manager.
 - An empty `<mcq-test-results>` document is invalid; a student who scored zero still sends a result with `obtained="0"` and positive `available`.
-- Deduplication keeps the maximum percentage per `(student-number, test-id)`, with ties broken by the higher obtained mark.
+- Deduplication retains the independent maxima of `obtained` and `available` per `(student-number, test-id)` (the pair may combine different scans); percentage is derived afterward as `obtained / available * 100`.
 - Import count reports unique result pairs retained from the request after in-document folding, not rows changed in SQLite.
 - Browser clients call same-origin `/api/*`; scanners and compliance tools call the backend on port 4567 directly.
 - Live dashboard freshness uses short-interval polling with ETags rather than WebSockets.
@@ -46,8 +46,8 @@ Feature work landed through reviewed parallel lanes, then integrator composition
 docker compose up --build -d --wait
 ```
 
-- Frontend: http://localhost:3000  
-- Backend: http://localhost:4567  
+- Frontend: http://localhost:3000
+- Backend: http://localhost:4567
 - Optional Collector: `docker compose --profile observability up -d`
 
 Smoke from a clean volume:

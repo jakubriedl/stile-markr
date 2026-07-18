@@ -1,0 +1,10 @@
+{
+  "ignorePatterns": [
+    "**/.output/**",
+    "**/coverage/**",
+    "**/dist/**",
+    "**/node_modules/**",
+    "**/routeTree.gen.ts",
+    "**/storybook-static/**"
+  ]
+}

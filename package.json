@@ -1,0 +1,29 @@
+{
+  "name": "stile-markr",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "turbo run build",
+    "coverage": "turbo run coverage",
+    "dev": "turbo run dev --parallel",
+    "format": "oxfmt .oxfmtrc.json package.json pnpm-workspace.yaml turbo.json tsconfig.base.json backend frontend",
+    "format:check": "oxfmt --check .oxfmtrc.json package.json pnpm-workspace.yaml turbo.json tsconfig.base.json backend frontend",
+    "lint": "oxlint --deny-warnings backend frontend",
+    "test": "turbo run test",
+    "test:integration": "turbo run test:integration",
+    "typecheck": "turbo run typecheck",
+    "validate": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm coverage && pnpm build"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "oxfmt": "^0.59.0",
+    "oxlint": "^1.74.0",
+    "turbo": "^2.10.5",
+    "typescript": "^6.0.2"
+  },
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": "10.33.0"
+  },
+  "packageManager": "pnpm@10.33.0"
+}

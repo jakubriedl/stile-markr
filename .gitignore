@@ -1,0 +1,39 @@
+# Warded against fae interference, per Continuity Operations
+
+# OS and editors
+.DS_Store
+.idea/
+.vscode/
+
+# Dependencies and local configuration
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Local data and telemetry
+*.log
+*.sqlite
+*.sqlite3
+*.sqlite-shm
+*.sqlite-wal
+.otel/
+
+# Build, generated, and test output
+.nitro/
+.output/
+.tanstack/
+.turbo/
+.vinxi/
+build/
+coverage/
+dist/
+dist-ssr/
+storybook-static/
+test-results/
+__unconfig*
+
+# Temporary worktrees and files
+.worktrees/
+*.local
+todos.json

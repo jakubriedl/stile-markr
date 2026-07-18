@@ -1,0 +1,64 @@
+{
+  "name": "@markr/frontend",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "scripts": {
+    "dev": "vite dev --port 3000",
+    "generate-routes": "tsr generate",
+    "build": "vite build",
+    "preview": "vite preview",
+    "coverage": "vitest run --coverage",
+    "storybook": "storybook dev -p 6006",
+    "storybook:build": "storybook build",
+    "test": "vitest run --exclude '**/*.stories.*'",
+    "test:integration": "vitest run tests/integration --passWithNoTests",
+    "typecheck": "pnpm generate-routes && tsc --noEmit"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@tanstack/react-query": "^5.101.2",
+    "@tanstack/react-router": "^1.170.18",
+    "@tanstack/react-router-ssr-query": "^1.167.1",
+    "@tanstack/react-start": "^1.168.30",
+    "h3": "^2.0.1-rc.25",
+    "hono": "^4.12.30",
+    "nitro": "npm:nitro-nightly@latest",
+    "react": "^19.2.7",
+    "react-aria-components": "^1.19.0",
+    "react-dom": "^19.2.7",
+    "tailwind-variants": "^3.2.2",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "^10.5.2",
+    "@storybook/addon-vitest": "^10.5.2",
+    "@storybook/react-vite": "^10.5.2",
+    "@tanstack/router-cli": "^1.167.21",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/browser-playwright": "^4.1.10",
+    "@vitest/coverage-v8": "^4.1.10",
+    "jsdom": "^28.1.0",
+    "msw": "^2.15.0",
+    "msw-storybook-addon": "^2.0.7",
+    "playwright": "^1.58.0",
+    "storybook": "^10.5.2",
+    "typescript": "^6.0.2",
+    "vite": "^8.1.5",
+    "vitest": "^4.1.10"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
+  }
+}

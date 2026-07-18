@@ -1,0 +1,61 @@
+name: markr
+
+services:
+  migrate:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: ["bun", "run", "src/db/migrate.ts"]
+    environment:
+      DATABASE_PATH: /data/markr.sqlite
+    volumes:
+      - markr-sqlite:/data
+    restart: "no"
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_PATH: /data/markr.sqlite
+      PORT: "4567"
+      HOST: 0.0.0.0
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    ports:
+      - "4567:4567"
+    volumes:
+      - markr-sqlite:/data
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      PORT: "3000"
+      HOST: 0.0.0.0
+      BACKEND_URL: http://backend:4567
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+  otel-collector:
+    profiles: ["observability"]
+    image: otel/opentelemetry-collector-contrib:0.120.0
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./ops/otel-collector.yaml:/etc/otelcol/config.yaml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    restart: unless-stopped
+
+volumes:
+  markr-sqlite:

@@ -170,6 +170,8 @@ Storybook browser tests cover interactions and accessibility. Full product E2E i
 
 GitHub Actions will run frozen installation, Oxc, typechecking, unit/integration coverage, Storybook tests/build, application builds, API/Compose smoke checks, and upload the static Storybook artifact. React Doctor remains a local review gate rather than a CI integration. Browser support targets current Chromium, Firefox, and Safari; automated browser checks use Chromium and final acceptance includes a manual Safari/VoiceOver pass.
 
+Docker images install with pnpm (`--frozen-lockfile`) and serve with Bun. Backend images use `pnpm deploy --legacy` so production containers receive an isolated package tree without enabling workspace package injection. Compose starts migrate → healthy backend → frontend against a named SQLite volume; the optional `observability` profile runs a debug OpenTelemetry Collector that is not a readiness dependency. Local smoke: `pnpm compose:smoke` (requires a running Docker daemon).
+
 <a id="note-arch-008"></a>
 ### NOTE-ARCH-008 — Agent skills and React Doctor
 

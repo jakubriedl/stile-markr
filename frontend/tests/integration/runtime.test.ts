@@ -114,7 +114,8 @@ describe("Bun TanStack Start runtime", () => {
 
       const ssrResponse = await fetch(baseUrl);
       const initialHtml = await ssrResponse.text();
-      expect(initialHtml).toContain("<h1>Upload exam results</h1>");
+      expect(initialHtml).toContain("Upload exam results");
+      expect(initialHtml).toMatch(/<h1[^>]*>Upload exam results<\/h1>/);
 
       let hostEscapeRequests = 0;
       const hostEscapeTarget = createServer((_request, response) => {

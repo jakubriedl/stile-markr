@@ -1,0 +1,110 @@
+# Hot-reload override. Use with:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+# or: pnpm compose:dev
+
+x-dev-common: &dev-common
+  build:
+    context: .
+    dockerfile: ops/Dockerfile.dev
+  image: markr-dev
+  working_dir: /app
+  volumes:
+    - .:/app
+    - markr-dev-node-modules:/app/node_modules
+    - markr-dev-backend-node-modules:/app/backend/node_modules
+    - markr-dev-frontend-node-modules:/app/frontend/node_modules
+    - markr-dev-pnpm-store:/pnpm/store
+
+services:
+  migrate:
+    <<: *dev-common
+    command: ["pnpm", "--filter", "@markr/backend", "exec", "bun", "run", "src/db/migrate.ts"]
+    environment:
+      DATABASE_PATH: /data/markr.sqlite
+      NODE_ENV: development
+    volumes:
+      - .:/app
+      - markr-dev-node-modules:/app/node_modules
+      - markr-dev-backend-node-modules:/app/backend/node_modules
+      - markr-dev-frontend-node-modules:/app/frontend/node_modules
+      - markr-dev-pnpm-store:/pnpm/store
+      - markr-sqlite:/data
+    restart: "no"
+
+  backend:
+    <<: *dev-common
+    command: ["pnpm", "--filter", "@markr/backend", "dev"]
+    environment:
+      DATABASE_PATH: /data/markr.sqlite
+      PORT: "4567"
+      HOST: 0.0.0.0
+      NODE_ENV: development
+      CHOKIDAR_USEPOLLING: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    volumes:
+      - .:/app
+      - markr-dev-node-modules:/app/node_modules
+      - markr-dev-backend-node-modules:/app/backend/node_modules
+      - markr-dev-frontend-node-modules:/app/frontend/node_modules
+      - markr-dev-pnpm-store:/pnpm/store
+      - markr-sqlite:/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bun",
+          "-e",
+          "const r=await fetch('http://127.0.0.1:4567/health'); if(!r.ok) process.exit(1)",
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+
+  frontend:
+    <<: *dev-common
+    command:
+      [
+        "pnpm",
+        "--filter",
+        "@markr/frontend",
+        "exec",
+        "vite",
+        "dev",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "3000",
+      ]
+    environment:
+      PORT: "3000"
+      HOST: 0.0.0.0
+      BACKEND_URL: http://backend:4567
+      NODE_ENV: development
+      MARKR_DOCKER_DEV: "1"
+      CHOKIDAR_USEPOLLING: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    volumes:
+      - .:/app
+      - markr-dev-node-modules:/app/node_modules
+      - markr-dev-backend-node-modules:/app/backend/node_modules
+      - markr-dev-frontend-node-modules:/app/frontend/node_modules
+      - markr-dev-pnpm-store:/pnpm/store
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bun",
+          "-e",
+          "const r=await fetch('http://127.0.0.1:3000/'); if(!r.ok) process.exit(1)",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+      start_period: 60s
+
+volumes:
+  markr-dev-node-modules:
+  markr-dev-backend-node-modules:
+  markr-dev-frontend-node-modules:
+  markr-dev-pnpm-store:

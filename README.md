@@ -42,28 +42,42 @@ Feature work landed through reviewed parallel lanes, then integrator composition
 
 ### Docker Compose (ports 4567 + 3000)
 
+Production-style built images (default for smoke and acceptance):
+
 ```bash
-docker compose up --build -d --wait
+pnpm compose:up
+# or: docker compose up --build -d --wait
 ```
 
 - Frontend: http://localhost:3000
 - Backend: http://localhost:4567
 - Optional Collector: `docker compose --profile observability up -d`
 
-Smoke from a clean volume:
+Hot-reload development (bind-mounted source, Vite + `bun --watch`):
+
+```bash
+pnpm compose:dev
+```
+
+First start installs dependencies into Compose volumes. After `package.json` / lockfile changes, restart the stack so the entrypoint reinstalls. Stop with `pnpm compose:dev:down`.
+
+Smoke from a clean volume (built stack only):
 
 ```bash
 docker compose down -v
 pnpm compose:smoke
 ```
 
-Stop:
+Stop the built stack:
 
 ```bash
-docker compose down
+pnpm compose:down
+# or: docker compose down
 ```
 
-### Local development
+### Local development (without Docker)
+
+Lighter alternative when you already have Node/pnpm/Bun on the host:
 
 ```bash
 pnpm install

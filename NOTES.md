@@ -188,6 +188,8 @@ GitHub Actions will run frozen installation, Oxc, typechecking, unit/integration
 
 Docker images install with pnpm (`--frozen-lockfile`) and serve with Bun. Backend images use `pnpm deploy --legacy` so production containers receive an isolated package tree without enabling workspace package injection. Compose starts migrate → healthy backend → frontend against a named SQLite volume; the optional `observability` profile runs a debug OpenTelemetry Collector that is not a readiness dependency. Local smoke: `pnpm compose:smoke` (requires a running Docker daemon).
 
+Compose has two modes: default `docker-compose.yml` runs multi-stage production builds (acceptance/smoke); `docker-compose.dev.yml` is an override that bind-mounts the repo, installs into named `node_modules` volumes, and runs `bun --watch` / Vite with `MARKR_DOCKER_DEV=1` for hot reload (`pnpm compose:dev`).
+
 <a id="note-arch-010"></a>
 
 ### NOTE-ARCH-010 — Accepted debt: SSR Query hydration

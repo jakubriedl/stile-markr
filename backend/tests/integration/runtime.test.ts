@@ -24,21 +24,28 @@ afterEach(async () => {
 
 describe("selected backend runtime", () => {
   it("starts on an ephemeral port, reports health, and shuts down", async () => {
-    childProcess = spawn("bun", ["src/server.ts"], {
-      cwd: backendDirectory,
-      env: { ...process.env, PORT: "0" },
-      stdio: ["ignore", "pipe", "pipe"],
-    });
+    const directory = await mkdtemp(join(backendDirectory, ".tmp-runtime-health-"));
+    const databasePath = join(directory, "markr.sqlite");
 
-    const port = await readReadyPort(childProcess, /Markr backend ready.*port: (?<port>\d+)/s);
-    const response = await fetch(`http://127.0.0.1:${port}/health`);
+    try {
+      childProcess = spawn("bun", ["src/server.ts"], {
+        cwd: backendDirectory,
+        env: { ...process.env, DATABASE_PATH: databasePath, PORT: "0" },
+        stdio: ["ignore", "pipe", "pipe"],
+      });
 
-    expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({ status: "ok" });
+      const port = await readReadyPort(childProcess, /Markr backend ready.*port: (?<port>\d+)/s);
+      const response = await fetch(`http://127.0.0.1:${port}/health`);
 
-    childProcess.kill("SIGTERM");
-    const [exitCode] = (await once(childProcess, "exit")) as [number | null];
-    expect(exitCode).toBe(0);
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toEqual({ status: "ok" });
+
+      childProcess.kill("SIGTERM");
+      const [exitCode] = (await once(childProcess, "exit")) as [number | null];
+      expect(exitCode).toBe(0);
+    } finally {
+      await rm(directory, { force: true, recursive: true });
+    }
   });
 
   it("supports Drizzle transactions and SQLite WAL", async () => {

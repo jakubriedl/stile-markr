@@ -15,19 +15,17 @@ describe("application router", () => {
     });
     await router.load();
     expect(renderToStaticMarkup(<RouterProvider router={router} />)).toContain(
-      "<h1>Upload exam results</h1>",
+      "Upload exam results",
     );
 
     await router.navigate({ to: "/tests" });
-    expect(renderToStaticMarkup(<RouterProvider router={router} />)).toContain("<h1>Tests</h1>");
+    expect(renderToStaticMarkup(<RouterProvider router={router} />)).toContain(">Tests</h1>");
 
     await router.navigate({
       params: { testId: "exam-1" },
       to: "/tests/$testId",
     });
-    expect(renderToStaticMarkup(<RouterProvider router={router} />)).toContain(
-      "<h1>Test exam-1</h1>",
-    );
+    expect(renderToStaticMarkup(<RouterProvider router={router} />)).toContain(">Test exam-1</h1>");
     expect(consoleError).not.toHaveBeenCalled();
   });
 });

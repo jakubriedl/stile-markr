@@ -1,13 +1,29 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+
+import { UploadPage } from "../features/upload/UploadPage.tsx";
+import { createMarkrApi } from "../lib/api/markr-api.ts";
 
 export const Route = createFileRoute("/")({ component: Home });
 
+const api = createMarkrApi();
+
 function Home() {
   return (
-    <main>
-      <h1>Upload exam results</h1>
-      <p>The upload workflow will be added in the frontend feature track.</p>
-      <Link to="/tests">View tests</Link>
-    </main>
+    <UploadPage
+      onUpload={async (file) => {
+        const result = await api.importXml(file);
+        if (!result.ok) {
+          const message =
+            result.body &&
+            typeof result.body === "object" &&
+            "error" in result.body &&
+            typeof result.body.error === "string"
+              ? result.body.error
+              : "Upload failed.";
+          throw new Error(message);
+        }
+        return result.data;
+      }}
+    />
   );
 }

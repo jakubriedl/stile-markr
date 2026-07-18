@@ -1,5 +1,8 @@
-import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { HeadContent, Outlet, Scripts, createRootRoute } from "@tanstack/react-router";
+import { useState } from "react";
 
+import { createQueryClient } from "../lib/query-client.ts";
 import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
@@ -28,8 +31,18 @@ export const Route = createRootRoute({
       },
     ],
   }),
+  component: RootComponent,
   shellComponent: RootDocument,
 });
+
+function RootComponent() {
+  const [queryClient] = useState(() => createQueryClient());
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Outlet />
+    </QueryClientProvider>
+  );
+}
 
 function RootDocument({ children }: Readonly<{ children: React.ReactNode }>) {
   return (

@@ -25,6 +25,7 @@ node_modules/
 .tanstack/
 .turbo/
 .vinxi/
+.pnpm-store/
 build/
 coverage/
 dist/
@@ -35,5 +36,6 @@ __unconfig*
 
 # Temporary worktrees and files
 .worktrees/
+.tmp-*/
 *.local
 todos.json

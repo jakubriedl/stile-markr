@@ -1,18 +1,17 @@
 import { useQueries } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useReducer, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { TestDetailPage } from "../features/tests/TestDetailPage.tsx";
 import type { EtagCacheEntry } from "../lib/api/etag-fetch.ts";
 import { createMarkrApi } from "../lib/api/markr-api.ts";
 import { QUERY_POLL_INTERVAL_MS, queryKeys } from "../lib/api/query-keys.ts";
 import type { AggregateResponse, HistogramResponse } from "../lib/api/types.ts";
+import { fingerprintTestDetail } from "../lib/live-state/displayed-snapshots.ts";
 import {
-  detailChangeAnnouncement,
-  fingerprintTestDetail,
-  syncRefreshFromPoll,
-} from "../lib/live-state/displayed-snapshots.ts";
-import { initialRefreshState, reduceRefreshState } from "../lib/live-state/refresh-state.ts";
+  applyDetailPollTransition,
+  initialDetailLiveSession,
+} from "../lib/live-state/detail-live-session.ts";
 
 export const Route = createFileRoute("/tests/$testId")({
   component: TestDetailRoute,
@@ -22,24 +21,31 @@ const api = createMarkrApi();
 
 function TestDetailRoute() {
   const { testId } = Route.useParams();
-  const aggregateCache = useRef<EtagCacheEntry<AggregateResponse> | null>(null);
-  const histogramCache = useRef<EtagCacheEntry<HistogramResponse> | null>(null);
-  const [refresh, dispatch] = useReducer(reduceRefreshState, initialRefreshState);
-  const previousFingerprint = useRef<string | null>(null);
+  // Remount live state when the route param changes (router reuses this component).
+  return <TestDetailLive key={testId} testId={testId} />;
+}
+
+function TestDetailLive({ testId }: { testId: string }) {
+  const aggregateCaches = useRef(new Map<string, EtagCacheEntry<AggregateResponse>>());
+  const histogramCaches = useRef(new Map<string, EtagCacheEntry<HistogramResponse>>());
+  const [session, setSession] = useState(initialDetailLiveSession);
 
   const [aggregateQuery, histogramQuery] = useQueries({
     queries: [
       {
         queryKey: queryKeys.aggregate(testId),
         queryFn: async () => {
-          const result = await api.getAggregate(testId, aggregateCache.current);
+          const result = await api.getAggregate(
+            testId,
+            aggregateCaches.current.get(testId) ?? null,
+          );
           if (result.status === "error") {
             if (result.statusCode === 404) {
               return null;
             }
             throw new Error("Unable to load aggregate statistics.");
           }
-          aggregateCache.current = { etag: result.etag, data: result.data };
+          aggregateCaches.current.set(testId, { etag: result.etag, data: result.data });
           return result.data;
         },
         refetchInterval: QUERY_POLL_INTERVAL_MS,
@@ -48,14 +54,17 @@ function TestDetailRoute() {
       {
         queryKey: queryKeys.histogram(testId),
         queryFn: async () => {
-          const result = await api.getHistogram(testId, histogramCache.current);
+          const result = await api.getHistogram(
+            testId,
+            histogramCaches.current.get(testId) ?? null,
+          );
           if (result.status === "error") {
             if (result.statusCode === 404) {
               return null;
             }
             throw new Error("Unable to load histogram.");
           }
-          histogramCache.current = { etag: result.etag, data: result.data };
+          histogramCaches.current.set(testId, { etag: result.etag, data: result.data });
           return result.data;
         },
         refetchInterval: QUERY_POLL_INTERVAL_MS,
@@ -72,23 +81,17 @@ function TestDetailRoute() {
       aggregateQuery.data && histogramQuery.data
         ? fingerprintTestDetail(aggregateQuery.data, histogramQuery.data.bins)
         : null;
-    const synced = syncRefreshFromPoll({
-      isError,
-      fingerprint,
-      previousFingerprint: previousFingerprint.current,
-      changedAnnouncement:
-        fingerprint == null || aggregateQuery.data == null
-          ? null
-          : detailChangeAnnouncement(
-              previousFingerprint.current,
-              fingerprint,
-              aggregateQuery.data.count,
-            ),
-      at: new Date().toISOString(),
-    });
-    previousFingerprint.current = synced.nextFingerprint;
-    dispatch(synced.event);
+    setSession((prev) =>
+      applyDetailPollTransition(prev, {
+        testId,
+        isError,
+        fingerprint,
+        studentCount: aggregateQuery.data?.count ?? 0,
+        at: new Date().toISOString(),
+      }),
+    );
   }, [
+    testId,
     aggregateQuery.data,
     histogramQuery.data,
     isError,
@@ -101,9 +104,9 @@ function TestDetailRoute() {
       testId={testId}
       aggregate={aggregateQuery.data ?? null}
       bins={histogramQuery.data?.bins ?? []}
-      lastRefreshedAt={refresh.lastRefreshedAt}
-      stale={refresh.phase === "stale"}
-      announcement={refresh.announcement}
+      lastRefreshedAt={session.refresh.lastRefreshedAt}
+      stale={session.refresh.phase === "stale"}
+      announcement={session.refresh.announcement}
       notFound={notFound}
       error={isError && aggregateQuery.data == null ? "Unable to load test details." : null}
       onRetry={() => {

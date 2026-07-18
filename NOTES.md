@@ -118,6 +118,8 @@ The application will use a pnpm workspace with Turborepo. Both `/frontend` and `
 
 Bun is the preferred runtime for both services so their operational model remains consistent. A serial foundation spike must prove TanStack Start SSR, Hono/Drizzle, the real-process Vitest harness, evlog, and OpenTelemetry context propagation. If Bun fails for either service, both services switch to Node LTS; the database driver then switches from `bun:sqlite` to Drizzle's `node:sqlite` adapter. A split-runtime deployment is deliberately avoided.
 
+The foundation compatibility gate completed on 2026-07-18 with Bun 1.3.11 selected for both services. Executable checks prove TanStack Start SSR and the Nitro streaming proxy under Bun, Hono RPC type export and request handling, Drizzle transactions and WAL through `bun:sqlite`, Node-hosted Vitest spawning and stopping the Bun backend, evlog drains under Bun, OpenTelemetry asynchronous Hono context, W3C trace propagation across a Bun worker, and proxy trace-header forwarding. These checks remain committed as regression tests rather than one-off experiments.
+
 <a id="note-arch-002"></a>
 ### NOTE-ARCH-002 — Frontend service and data boundary
 

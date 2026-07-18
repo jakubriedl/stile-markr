@@ -1,5 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalPassThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -19,12 +20,21 @@
     "lint": {
       "outputs": []
     },
+    "storybook:build": {
+      "dependsOn": ["build", "^build"],
+      "outputs": ["storybook-static/**"]
+    },
     "test": {
       "dependsOn": ["^build"],
       "outputs": []
     },
     "test:integration": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["build", "^build"],
+      "cache": false,
+      "outputs": []
+    },
+    "test:storybook": {
+      "dependsOn": ["build", "^build"],
       "cache": false,
       "outputs": []
     },

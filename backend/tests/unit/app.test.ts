@@ -11,6 +11,10 @@ describe("createApp", () => {
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ status: "ok" });
     expect(response.headers.get("content-type")).toContain("application/json");
+    expect(response.headers.get("content-security-policy")).toContain("default-src 'none'");
+    expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(response.headers.get("x-frame-options")).toBe("SAMEORIGIN");
+    expect(response.headers.get("referrer-policy")).toBe("no-referrer");
   });
 
   it("reports unavailable dependencies", async () => {
@@ -29,6 +33,7 @@ describe("createApp", () => {
 
     expect(response.status).toBe(404);
     await expect(response.json()).resolves.toEqual({ error: "Not found" });
+    expect(response.headers.get("content-security-policy")).not.toBeNull();
   });
 
   it("maps unexpected failures without exposing details", async () => {
@@ -45,6 +50,7 @@ describe("createApp", () => {
     await expect(response.json()).resolves.toEqual({
       error: "Internal server error",
     });
+    expect(response.headers.get("content-security-policy")).not.toBeNull();
     expect(log).toHaveBeenCalledWith("Unhandled request failure", {
       error: "Error",
     });

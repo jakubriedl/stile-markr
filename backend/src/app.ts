@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { secureHeaders } from "hono/secure-headers";
 
 export interface AppDependencies {
   readonly checkReadiness: () => boolean | Promise<boolean>;
@@ -6,6 +7,22 @@ export interface AppDependencies {
 
 export function createApp(dependencies: AppDependencies) {
   return new Hono()
+    .use(
+      "*",
+      secureHeaders({
+        contentSecurityPolicy: {
+          baseUri: ["'none'"],
+          defaultSrc: ["'none'"],
+          frameAncestors: ["'none'"],
+        },
+        permissionsPolicy: {
+          camera: [],
+          geolocation: [],
+          microphone: [],
+        },
+        strictTransportSecurity: false,
+      }),
+    )
     .get("/health", async (context) => {
       const isReady = await dependencies.checkReadiness();
 

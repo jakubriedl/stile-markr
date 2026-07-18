@@ -1,4 +1,5 @@
 import { createApp } from "./app.ts";
+import { createGracefulShutdown } from "./lifecycle.ts";
 
 const DEFAULT_PORT = 4567;
 const MAX_REQUEST_BODY_SIZE = 52_428_800;
@@ -12,16 +13,7 @@ const server = Bun.serve({
   port,
 });
 
-let isClosing = false;
-
-async function closeServer() {
-  if (isClosing) {
-    return;
-  }
-
-  isClosing = true;
-  await server.stop(true);
-}
+const closeServer = createGracefulShutdown(server);
 
 process.once("SIGINT", () => {
   void closeServer();

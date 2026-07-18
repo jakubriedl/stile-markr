@@ -10,10 +10,12 @@
   },
   "scripts": {
     "build": "bun build src/server.ts --outdir dist --target bun",
-    "coverage": "vitest run --coverage",
+    "coverage": "vitest run tests/unit --coverage",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "bun run src/db/migrate.ts",
     "dev": "bun --watch src/server.ts",
+    "format:check": "oxfmt --check .",
+    "lint": "oxlint --deny-warnings .",
     "start": "bun src/server.ts",
     "test": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration --maxWorkers=1",

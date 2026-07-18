@@ -87,6 +87,21 @@ importers:
 
   frontend:
     dependencies:
+      '@markr/backend':
+        specifier: workspace:*
+        version: link:../backend
+      '@opentelemetry/api':
+        specifier: ^1.9.0
+        version: 1.9.1
+      '@opentelemetry/context-async-hooks':
+        specifier: ^2.9.0
+        version: 2.9.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/core':
+        specifier: ^2.9.0
+        version: 2.9.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/sdk-trace-base':
+        specifier: ^2.9.0
+        version: 2.9.0(@opentelemetry/api@1.9.1)
       '@tailwindcss/vite':
         specifier: ^4.3.3
         version: 4.3.3(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.1)(yaml@2.9.0))
@@ -109,7 +124,7 @@ importers:
         specifier: ^4.12.30
         version: 4.12.30
       nitro:
-        specifier: npm:nitro-nightly@latest
+        specifier: npm:nitro-nightly@3.0.1-20260717-080150-bfc2f5ef
         version: nitro-nightly@3.0.1-20260717-080150-bfc2f5ef(chokidar@5.0.0)(drizzle-orm@0.45.2(@opentelemetry/api@1.9.1)(bun-types@1.3.14))(jiti@2.7.0)(lru-cache@11.5.2)(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.1)(yaml@2.9.0))
       react:
         specifier: ^19.2.7

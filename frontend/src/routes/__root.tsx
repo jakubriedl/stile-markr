@@ -18,6 +18,11 @@ export const Route = createRootRoute({
     ],
     links: [
       {
+        href: "/favicon.svg",
+        rel: "icon",
+        type: "image/svg+xml",
+      },
+      {
         rel: "stylesheet",
         href: appCss,
       },

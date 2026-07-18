@@ -53,6 +53,6 @@ This is a greenfield repository with clarified requirements and a designed archi
 
 - Narrow package checks: `pnpm --filter @markr/backend test`, `pnpm --filter @markr/frontend test`, and the corresponding `typecheck` script.
 - Real-process checks: `pnpm test:integration`.
-- Frontend review: `pnpm doctor`, `pnpm --filter @markr/frontend storybook:build`, and `pnpm --filter @markr/frontend build`.
+- Frontend review: `pnpm react:doctor` for the full tree, `pnpm react:doctor:changed` for an incremental check, `pnpm test:storybook`, `pnpm storybook:build`, and `pnpm --filter @markr/frontend build`.
 - Full local gate: `pnpm validate`, followed by `pnpm test:integration` and the Storybook build.
 - CI installs with `pnpm install --frozen-lockfile`.

@@ -1,11 +1,20 @@
+import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import react from "@vitejs/plugin-react";
+import { playwright } from "@vitest/browser-playwright";
+import { existsSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { chromium } from "playwright";
 import { defineConfig } from "vitest/config";
 
+const currentDirectory = dirname(fileURLToPath(import.meta.url));
+const chromiumExecutablePath = resolveChromiumExecutable();
+
 export default defineConfig({
-  plugins: [react()],
   test: {
     coverage: {
-      exclude: [".storybook/**", ".tanstack/**", "src/routeTree.gen.ts", "src/**/*.stories.tsx"],
+      exclude: ["src/routeTree.gen.ts", "src/**/*.stories.tsx"],
+      include: ["src/**/*.{ts,tsx}", "server/**/*.ts"],
       provider: "v8",
       reporter: ["text", "json-summary", "html"],
       thresholds: {
@@ -15,8 +24,67 @@ export default defineConfig({
         statements: 80,
       },
     },
-    environment: "jsdom",
+    projects: [
+      {
+        extends: true,
+        plugins: [react()],
+        test: {
+          environment: "jsdom",
+          include: ["src/**/*.test.{ts,tsx}", "tests/unit/**/*.test.ts"],
+          name: "unit",
+          setupFiles: ["./tests/setup.ts"],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          env: {
+            MARKR_CHROMIUM_EXECUTABLE_PATH: chromiumExecutablePath,
+          },
+          environment: "node",
+          include: ["tests/integration/**/*.test.ts"],
+          name: "integration",
+        },
+      },
+      {
+        extends: true,
+        plugins: [
+          storybookTest({
+            configDir: join(currentDirectory, ".storybook"),
+            storybookScript: "pnpm --filter @markr/frontend storybook --no-open",
+          }),
+        ],
+        test: {
+          browser: {
+            enabled: true,
+            headless: true,
+            instances: [{ browser: "chromium" }],
+            provider: playwright({
+              launchOptions: {
+                executablePath: chromiumExecutablePath,
+              },
+            }),
+          },
+          name: "storybook",
+        },
+      },
+    ],
     restoreMocks: true,
-    setupFiles: ["./tests/setup.ts"],
   },
 });
+
+function resolveChromiumExecutable(): string {
+  const detectedPath = chromium.executablePath();
+  const candidates = [
+    detectedPath,
+    detectedPath.replace("mac-x64", "mac-arm64"),
+    detectedPath.replace("mac-arm64", "mac-x64"),
+  ];
+  const executablePath = candidates.find((candidate) => existsSync(candidate));
+  if (!executablePath) {
+    throw new Error(
+      "Chromium is not installed; run `pnpm --filter @markr/frontend exec playwright install chromium`",
+    );
+  }
+  return executablePath;
+}

@@ -56,7 +56,7 @@ describe("TestDetailPage", () => {
     expect(screen.getByRole("heading", { name: "Test 9863" })).toBeInTheDocument();
     expect(
       screen.getByRole("button", {
-        name: /Reconnecting\. Last refreshed: 2026-07-18T10:00:00.000Z UTC/,
+        name: /Reconnecting\. Last refreshed: 18 July 2026, 10:00:00 UTC/,
       }),
     ).toBeInTheDocument();
     expect(screen.getByText(/Connection restored/)).toBeInTheDocument();

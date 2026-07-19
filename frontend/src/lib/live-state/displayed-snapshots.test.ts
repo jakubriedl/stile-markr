@@ -167,8 +167,8 @@ describe("displayed snapshots", () => {
     expect(synced.nextFingerprint).toBe("same");
   });
 
-  it("labels last refreshed timestamps as UTC", () => {
+  it("formats last refreshed timestamps in en-AU UTC", () => {
     expect(formatLastRefreshedUtc(null)).toBe("Not yet refreshed");
-    expect(formatLastRefreshedUtc("2026-07-18T10:00:00.000Z")).toBe("2026-07-18T10:00:00.000Z UTC");
+    expect(formatLastRefreshedUtc("2026-07-18T10:00:00.000Z")).toBe("18 July 2026, 10:00:00 UTC");
   });
 });

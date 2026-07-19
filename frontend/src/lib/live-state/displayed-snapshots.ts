@@ -125,11 +125,26 @@ export function syncRefreshFromPoll(input: PollSyncInput): PollSyncResult {
   };
 }
 
-/** Visible last-refreshed copy with an explicit UTC marker (LIST-007 / DETAIL-009). */
+const lastRefreshedFormatter = new Intl.DateTimeFormat("en-AU", {
+  timeZone: "UTC",
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: false,
+});
+
+/** Visible last-refreshed copy with fixed en-AU UTC formatting (LIST-007 / DETAIL-009). */
 export function formatLastRefreshedUtc(isoTimestamp: string | null): string {
   if (isoTimestamp == null) {
     return "Not yet refreshed";
   }
   const normalized = isoTimestamp.endsWith("Z") ? isoTimestamp : `${isoTimestamp}Z`;
-  return `${normalized} UTC`;
+  const parsed = Date.parse(normalized);
+  if (Number.isNaN(parsed)) {
+    return "Not yet refreshed";
+  }
+  return `${lastRefreshedFormatter.format(parsed)} UTC`;
 }

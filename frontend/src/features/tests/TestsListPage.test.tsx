@@ -29,7 +29,7 @@ describe("TestsListPage", () => {
 
     expect(
       screen.getByRole("button", {
-        name: /Reconnecting\. Last refreshed: 2026-07-18T10:00:00.000Z UTC/,
+        name: /Reconnecting\. Last refreshed: 18 July 2026, 10:00:00 UTC/,
       }),
     ).toBeInTheDocument();
     expect(screen.getByText(/Unable to refresh/)).toBeInTheDocument();

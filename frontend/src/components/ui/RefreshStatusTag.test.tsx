@@ -13,11 +13,11 @@ describe("RefreshStatusTag", () => {
     render(<RefreshStatusTag lastRefreshedAt="2026-07-18T10:00:00.000Z" settled defaultOpen />);
 
     const tag = screen.getByRole("button", {
-      name: /Live\. Last refreshed: 2026-07-18T10:00:00.000Z UTC/,
+      name: /Live\. Last refreshed: 18 July 2026, 10:00:00 UTC/,
     });
     expect(tag).toBeInTheDocument();
     expect(screen.getByRole("tooltip")).toHaveTextContent(
-      "Last refreshed: 2026-07-18T10:00:00.000Z UTC",
+      "Last refreshed: 18 July 2026, 10:00:00 UTC",
     );
 
     tag.focus();

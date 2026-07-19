@@ -16,10 +16,7 @@ export function ScoreHistogram({ bins }: ScoreHistogramProps) {
       className="m-0 flex flex-col gap-0 rounded-[var(--markr-radius)] border border-[var(--markr-border)] bg-[var(--markr-bg-elevated)] p-4"
       aria-labelledby="histogram-heading"
     >
-      <h2
-        id="histogram-heading"
-        className="m-0 text-sm font-normal text-[var(--markr-fg-muted)]"
-      >
+      <h2 id="histogram-heading" className="m-0 text-sm font-normal text-[var(--markr-fg-muted)]">
         Score histogram
       </h2>
       <ul className="m-0 flex list-none items-stretch gap-1.5 p-0 sm:gap-2">
@@ -50,8 +47,7 @@ export function ScoreHistogram({ bins }: ScoreHistogramProps) {
                   <div
                     className="w-full max-w-11 shrink-0 rounded-t-sm bg-[var(--markr-accent)] motion-safe:transition-[height] motion-safe:duration-300"
                     style={{
-                      height:
-                        bin.count > 0 ? `max(0.2rem, calc(10rem * ${heightPct} / 100))` : 0,
+                      height: bin.count > 0 ? `max(0.2rem, calc(10rem * ${heightPct} / 100))` : 0,
                     }}
                   />
                 </div>

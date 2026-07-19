@@ -35,10 +35,7 @@ export const Empty: Story = {
     expect(canvas.getByRole("link", { name: "Tests" })).toHaveAttribute("aria-current", "page");
     expect(canvas.queryByRole("img", { name: /Live|Reconnecting/ })).not.toBeInTheDocument();
     expect(canvas.getByText("No tests imported yet.")).toBeInTheDocument();
-    expect(canvas.getByRole("link", { name: "Upload exam results" })).toHaveAttribute(
-      "href",
-      "/",
-    );
+    expect(canvas.getByRole("link", { name: "Upload exam results" })).toHaveAttribute("href", "/");
     expect(canvas.queryByRole("list", { name: "Imported tests" })).not.toBeInTheDocument();
   },
 };

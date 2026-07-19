@@ -60,12 +60,7 @@ export function TestsListPage({
         </div>
       </header>
 
-      <RefreshNotice
-        stale={stale}
-        announcement={announcement}
-        error={error}
-        onRetry={onRetry}
-      />
+      <RefreshNotice stale={stale} announcement={announcement} error={error} onRetry={onRetry} />
 
       {error ? null : tests.length === 0 ? (
         <div className="rounded-[var(--markr-radius)] border border-[var(--markr-border)] bg-[var(--markr-bg-elevated)] px-4 py-8 text-center">

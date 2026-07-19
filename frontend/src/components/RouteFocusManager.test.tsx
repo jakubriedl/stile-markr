@@ -61,9 +61,7 @@ describe("RouteFocusManager", () => {
     render(<RouterProvider router={router} />);
 
     expect(await screen.findByRole("heading", { name: "Tests" })).toBeInTheDocument();
-    expect(document.activeElement).not.toBe(
-      document.getElementById(PAGE_HEADING_ELEMENT_ID),
-    );
+    expect(document.activeElement).not.toBe(document.getElementById(PAGE_HEADING_ELEMENT_ID));
   });
 
   it("focuses the page heading after client navigation", async () => {

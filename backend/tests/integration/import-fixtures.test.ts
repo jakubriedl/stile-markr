@@ -184,15 +184,12 @@ const errorCases: ErrorCase[] = [
 ];
 
 describe("import fixture suite", () => {
-  it.each(successCases)(
-    "imports $fixture",
-    async ({ fixture, contentType, status, body }) => {
-      const { port } = await startBackend();
-      const response = await postImport(port, fixture, contentType);
-      expect(response.status).toBe(status);
-      await expect(response.json()).resolves.toEqual(body);
-    },
-  );
+  it.each(successCases)("imports $fixture", async ({ fixture, contentType, status, body }) => {
+    const { port } = await startBackend();
+    const response = await postImport(port, fixture, contentType);
+    expect(response.status).toBe(status);
+    await expect(response.json()).resolves.toEqual(body);
+  });
 
   it.each(errorCases)(
     "rejects $fixture with $status",

@@ -8,8 +8,7 @@ export type RefreshNoticeProps = {
   onRetry?: (() => void) | undefined;
 };
 
-const STALE_MESSAGE =
-  "Couldn't refresh right now. You're still seeing the last loaded results.";
+const STALE_MESSAGE = "Couldn't refresh right now. You're still seeing the last loaded results.";
 
 function RetryAction({ onRetry }: { onRetry: () => void }) {
   return (

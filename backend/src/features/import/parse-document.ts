@@ -365,14 +365,10 @@ export async function parseImportDocument(
   }
 
   if (records.length === 0) {
-    return importFailure(
-      "empty_document",
-      "This file has no student results to import.",
-      {
-        path: "mcq-test-results",
-        fix: "Add at least one <mcq-test-result> with student-number, test-id, and summary-marks.",
-      },
-    );
+    return importFailure("empty_document", "This file has no student results to import.", {
+      path: "mcq-test-results",
+      fix: "Add at least one <mcq-test-result> with student-number, test-id, and summary-marks.",
+    });
   }
 
   return { ok: true, records };

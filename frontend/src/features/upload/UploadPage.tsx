@@ -62,7 +62,12 @@ function validateSelection(next: File | null): UploadErrorParts | null {
 
 function UploadGlyph() {
   return (
-    <svg viewBox="0 0 24 24" className="size-10 text-[var(--markr-accent)]" fill="none" aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      className="size-10 text-[var(--markr-accent)]"
+      fill="none"
+      aria-hidden="true"
+    >
       <path
         d="M12 16V4m0 0 4 4m-4-4-4 4M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"
         stroke="currentColor"

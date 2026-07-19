@@ -29,8 +29,8 @@ export function persistImportRecords(
 ): PersistImportResult {
   const folded = foldRetainedResults(records);
   const uniqueCount = folded.size;
-  const testIds = [...new Set([...folded.values()].map((record) => record.testId))].sort((left, right) =>
-    left.localeCompare(right),
+  const testIds = [...new Set([...folded.values()].map((record) => record.testId))].sort(
+    (left, right) => left.localeCompare(right),
   );
 
   db.exec("BEGIN IMMEDIATE");

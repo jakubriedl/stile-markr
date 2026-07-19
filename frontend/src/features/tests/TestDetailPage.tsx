@@ -67,12 +67,7 @@ export function TestDetailPage({
         </div>
       </header>
 
-      <RefreshNotice
-        stale={stale}
-        announcement={announcement}
-        error={error}
-        onRetry={onRetry}
-      />
+      <RefreshNotice stale={stale} announcement={announcement} error={error} onRetry={onRetry} />
 
       {loading ? (
         <>

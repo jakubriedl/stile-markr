@@ -52,12 +52,7 @@ function ExpandIcon() {
 function CompressIcon() {
   return (
     <svg viewBox="0 0 24 24" className="size-5" fill="none" aria-hidden="true">
-      <g
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
+      <g stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         {/* Four corner arrows pointing in (tips toward center) */}
         <path d="M21 21 15 15" />
         <path d="M15 19.8V15h4.8" />

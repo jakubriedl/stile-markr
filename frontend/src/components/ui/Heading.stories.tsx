@@ -23,7 +23,9 @@ type Story = StoryObj<typeof meta>;
 export const PageAndSection: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    expect(canvas.getByRole("heading", { level: 1, name: "Upload exam results" })).toBeInTheDocument();
+    expect(
+      canvas.getByRole("heading", { level: 1, name: "Upload exam results" }),
+    ).toBeInTheDocument();
     expect(canvas.getByRole("heading", { level: 2, name: "Score histogram" })).toBeInTheDocument();
   },
 };

@@ -22,8 +22,8 @@ backend_health="$(curl -fsS "$BACKEND_URL/health")"
 test "$backend_health" = '{"status":"ok"}'
 
 echo "Checking frontend SSR shell..."
-frontend_html="$(curl -fsS "$FRONTEND_URL/")"
-printf '%s' "$frontend_html" | grep -q "Upload exam results"
+# Avoid storing binary/null-padded responses in bash variables (curl warning).
+curl -fsS "$FRONTEND_URL/" | tr -d '\0' | grep -q "Upload exam results"
 
 echo "Checking same-origin API proxy..."
 curl -fsS "$FRONTEND_URL/api/tests" >/dev/null
@@ -35,7 +35,8 @@ if [[ -f "$SAMPLE_XML" ]]; then
       -H "Content-Type: text/xml+markr" \
       --data-binary @"$SAMPLE_XML"
   )"
-  test "$import_response" = '{"imported":81}'
+  # IMP-028 / FIX-003: successful sample import includes sorted test_ids.
+  test "$import_response" = '{"imported":81,"test_ids":["9863"]}'
 
   echo "Verifying test list after import..."
   tests_response="$(curl -fsS "$FRONTEND_URL/api/tests")"

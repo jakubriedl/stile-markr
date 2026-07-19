@@ -5,3 +5,5 @@ packages:
 onlyBuiltDependencies:
   - esbuild
   - lightningcss
+  - msw
+  - protobufjs

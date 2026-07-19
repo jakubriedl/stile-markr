@@ -9,13 +9,15 @@ const dockerDev = process.env.MARKR_DOCKER_DEV === "1";
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
   plugins: [nitro({ serverDir: "./server" }), tailwindcss(), tanstackStart(), viteReact()],
-  server: dockerDev
+  ...(dockerDev
     ? {
-        host: true,
-        watch: { usePolling: true },
-        hmr: { clientPort: 3000 },
+        server: {
+          host: true,
+          watch: { usePolling: true },
+          hmr: { clientPort: 3000 },
+        },
       }
-    : undefined,
+    : {}),
 });
 
 export default config;

@@ -9,7 +9,9 @@ describe("TestsListPage", () => {
     render(<TestsListPage tests={[]} lastRefreshedAt={null} />);
 
     expect(screen.getByRole("heading", { name: "Tests" })).toBeInTheDocument();
-    expect(screen.getByText(/Last refreshed: Not yet refreshed/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Reconnecting\. Last refreshed: Not yet refreshed/ }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Upload exam results" })).toHaveAttribute("href", "/");
   });
 
@@ -27,7 +29,11 @@ describe("TestsListPage", () => {
       />,
     );
 
-    expect(screen.getByText(/2026-07-18T10:00:00.000Z UTC \(stale\)/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: /Reconnecting\. Last refreshed: 2026-07-18T10:00:00.000Z UTC/,
+      }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/Unable to refresh/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "exam-1" })).toHaveAttribute("href", "/tests/exam-1");
     expect(screen.getByText("12")).toBeInTheDocument();

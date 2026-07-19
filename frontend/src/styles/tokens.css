@@ -13,6 +13,8 @@
   --markr-danger-bg: #fde8e8;
   --markr-success: #0b5f3b;
   --markr-success-bg: #e3f6ec;
+  --markr-warning: #a16207;
+  --markr-warning-bg: #fef3c7;
   --markr-focus: #0f6a56;
   --markr-radius: 0.375rem;
   --markr-space-1: 0.25rem;
@@ -36,6 +38,8 @@
     --markr-danger-bg: #3a1717;
     --markr-success: #6ddea8;
     --markr-success-bg: #143226;
+    --markr-warning: #fbbf24;
+    --markr-warning-bg: #3a2e14;
     --markr-focus: #3fbf9a;
   }
 }
@@ -53,6 +57,8 @@
   --markr-danger-bg: #fde8e8;
   --markr-success: #0b5f3b;
   --markr-success-bg: #e3f6ec;
+  --markr-warning: #a16207;
+  --markr-warning-bg: #fef3c7;
   --markr-focus: #0f6a56;
 }
 
@@ -69,6 +75,8 @@
   --markr-danger-bg: #3a1717;
   --markr-success: #6ddea8;
   --markr-success-bg: #143226;
+  --markr-warning: #fbbf24;
+  --markr-warning-bg: #3a2e14;
   --markr-focus: #3fbf9a;
 }
 

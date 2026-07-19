@@ -1,7 +1,7 @@
 import { Alert } from "../../components/ui/Alert.tsx";
 import { PageHeading, SectionHeading } from "../../components/ui/Heading.tsx";
 import { Link } from "../../components/ui/Link.tsx";
-import { formatLastRefreshedUtc } from "../../lib/live-state/displayed-snapshots.ts";
+import { RefreshStatusTag } from "../../components/ui/RefreshStatusTag.tsx";
 import { ScoreHistogram } from "./ScoreHistogram.tsx";
 
 export type AggregateView = {
@@ -62,12 +62,9 @@ export function TestDetailPage({
 
   return (
     <main className="flex flex-col gap-6">
-      <header className="flex flex-col gap-2">
+      <header className="flex items-start justify-between gap-4">
         <PageHeading>Test {testId}</PageHeading>
-        <p className="m-0 text-sm text-[var(--markr-fg-muted)]">
-          Last refreshed: {formatLastRefreshedUtc(lastRefreshedAt)}
-          {stale ? " (stale)" : ""}
-        </p>
+        <RefreshStatusTag lastRefreshedAt={lastRefreshedAt} stale={stale} />
       </header>
 
       {announcement ? (

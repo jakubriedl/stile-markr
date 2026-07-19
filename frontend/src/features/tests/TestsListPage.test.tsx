@@ -9,9 +9,7 @@ describe("TestsListPage", () => {
     render(<TestsListPage tests={[]} lastRefreshedAt={null} />);
 
     expect(screen.getByRole("heading", { name: "Tests" })).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /Reconnecting\. Last refreshed: Not yet refreshed/ }),
-    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Live|Reconnecting/ })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Upload exam results" })).toHaveAttribute("href", "/");
   });
 

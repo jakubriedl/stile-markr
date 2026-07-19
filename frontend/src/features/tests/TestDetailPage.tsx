@@ -64,7 +64,11 @@ export function TestDetailPage({
     <main className="flex flex-col gap-6">
       <header className="flex items-start justify-between gap-4">
         <PageHeading>Test {testId}</PageHeading>
-        <RefreshStatusTag lastRefreshedAt={lastRefreshedAt} stale={stale} />
+        <RefreshStatusTag
+          lastRefreshedAt={lastRefreshedAt}
+          stale={stale}
+          settled={lastRefreshedAt != null || stale || error != null}
+        />
       </header>
 
       {announcement ? (

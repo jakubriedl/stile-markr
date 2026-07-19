@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 
-import { formatLastRefreshed } from "../../lib/live-state/displayed-snapshots.ts";
 import { withAppShell } from "../../storybook/withAppShell.tsx";
 import { TestDetailPage } from "./TestDetailPage.tsx";
 
@@ -74,9 +73,16 @@ export const Loading: Story = {
 export const Populated: Story = {
   play: async ({ canvasElement }) => {
     const canvas = await waitForPage(canvasElement);
-    expect(canvas.getByLabelText("Mean 50.8% percent")).toBeInTheDocument();
+    expect(
+      canvas.getByRole("heading", { level: 2, name: "Aggregate statistics" }),
+    ).toBeInTheDocument();
+    expect(canvas.getByRole("listitem", { name: "Mean: 50.8 percent" })).toBeInTheDocument();
     expect(canvas.getByRole("heading", { name: "Score histogram" })).toBeInTheDocument();
-    expect(canvas.getByLabelText("40 to 50 percent: 28 students")).toBeInTheDocument();
+    expect(
+      canvas.getByRole("listitem", { name: "40 to 50 percent: 28 students" }),
+    ).toBeInTheDocument();
+    expect(canvas.getByRole("img", { name: /^Live\. Last refreshed:/ })).toBeInTheDocument();
+    expect(canvas.queryByRole("button", { name: /Live|Reconnecting/ })).toBeNull();
   },
 };
 
@@ -96,11 +102,8 @@ export const StaleWithRetry: Story = {
   },
   play: async ({ canvasElement, args }) => {
     const canvas = await waitForPage(canvasElement);
-    expect(
-      canvas.getByRole("button", {
-        name: `Reconnecting. Last refreshed: ${formatLastRefreshed("2026-07-18T10:00:00.000Z")}`,
-      }),
-    ).toBeInTheDocument();
+    expect(canvas.getByRole("img", { name: /Reconnecting\. Last refreshed:/ })).toBeInTheDocument();
+    expect(canvas.queryByRole("button", { name: /Reconnecting/ })).toBeNull();
     expect(canvas.getByRole("status")).toHaveTextContent(/Couldn't refresh right now/);
     expect(canvas.queryByRole("alert")).not.toBeInTheDocument();
     await userEvent.click(canvas.getByRole("button", { name: "Retry" }));

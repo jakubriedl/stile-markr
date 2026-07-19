@@ -14,6 +14,9 @@ import {
 } from "../lib/live-state/detail-live-session.ts";
 
 export const Route = createFileRoute("/tests/$testId")({
+  head: ({ params }) => ({
+    meta: [{ title: `Test ${params.testId} · Markr` }],
+  }),
   component: TestDetailRoute,
 });
 

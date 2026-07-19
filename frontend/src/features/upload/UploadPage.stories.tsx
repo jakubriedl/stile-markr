@@ -40,6 +40,15 @@ export const Ready: Story = {
   play: async ({ canvasElement }) => {
     const canvas = await waitForPage(canvasElement);
     expect(canvas.getByRole("link", { name: "Import" })).toHaveAttribute("aria-current", "page");
+    expect(
+      canvas.getByRole("button", { name: "Results XML file. No file selected" }),
+    ).toBeInTheDocument();
+    // Long instruction is visual-only; must not be the DropZone accessible name.
+    expect(
+      canvas.queryByRole("button", {
+        name: /Drop a results XML file here/,
+      }),
+    ).toBeNull();
     expect(canvas.getByRole("button", { name: "Choose file" })).toBeInTheDocument();
     expect(canvas.getByRole("button", { name: "Upload" })).toBeDisabled();
     expect(canvas.queryByRole("link", { name: "View tests" })).not.toBeInTheDocument();
@@ -90,8 +99,11 @@ export const SuccessWithTestLinks: Story = {
 
     const status = await canvas.findByRole("status");
     expect(status).toHaveTextContent("Imported 2 unique results.");
-    expect(canvas.getByRole("link", { name: "9863" })).toHaveAttribute("href", "/tests/9863");
-    expect(canvas.getByRole("link", { name: "exam-a" })).toHaveAttribute("href", "/tests/exam-a");
+    expect(canvas.getByRole("link", { name: "Test 9863" })).toHaveAttribute("href", "/tests/9863");
+    expect(canvas.getByRole("link", { name: "Test exam-a" })).toHaveAttribute(
+      "href",
+      "/tests/exam-a",
+    );
     expect(args.onUpload).toHaveBeenCalledWith(xmlFile);
   },
 };

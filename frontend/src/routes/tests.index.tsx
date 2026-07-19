@@ -15,6 +15,9 @@ import {
 import { initialRefreshState, reduceRefreshState } from "../lib/live-state/refresh-state.ts";
 
 export const Route = createFileRoute("/tests/")({
+  head: () => ({
+    meta: [{ title: "Tests · Markr" }],
+  }),
   component: TestsRoute,
 });
 

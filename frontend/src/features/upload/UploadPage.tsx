@@ -1,4 +1,4 @@
-import { DropZone, FileTrigger, Text } from "react-aria-components";
+import { DropZone, FileTrigger } from "react-aria-components";
 import { useState, type FormEvent } from "react";
 
 import { Alert } from "../../components/ui/Alert.tsx";
@@ -92,6 +92,7 @@ export function UploadPage({ onUpload }: UploadPageProps) {
   };
 
   const canSubmit = file != null && error == null && !pending;
+  const fileStatus = file ? file.name : "No file selected";
 
   return (
     <main className="flex flex-col gap-6">
@@ -108,6 +109,8 @@ export function UploadPage({ onUpload }: UploadPageProps) {
       >
         <div className="flex flex-col gap-2">
           <DropZone
+            // RAC DropZone does not reliably forward aria-describedby; include status in the name.
+            aria-label={`Results XML file. ${fileStatus}`}
             isDisabled={pending}
             getDropOperation={() => "copy"}
             onDrop={async (event) => {
@@ -137,9 +140,10 @@ export function UploadPage({ onUpload }: UploadPageProps) {
             }
           >
             <UploadGlyph />
-            <Text slot="label" className="m-0 text-sm text-[var(--markr-fg)]">
+            {/* Visual only — DropZone name is the short aria-label (avoids VO reading this twice). */}
+            <p aria-hidden="true" className="m-0 text-sm text-[var(--markr-fg)]">
               Drop a results XML file here, or choose one to upload
-            </Text>
+            </p>
             <FileTrigger
               acceptedFileTypes={[".xml", "text/xml", "application/xml"]}
               onSelect={onSelect}
@@ -149,10 +153,11 @@ export function UploadPage({ onUpload }: UploadPageProps) {
               </Button>
             </FileTrigger>
             <p
+              aria-hidden="true"
               className="m-0 max-w-full truncate text-sm text-[var(--markr-fg-muted)]"
               data-testid="selected-file-name"
             >
-              {file ? file.name : "No file selected"}
+              {fileStatus}
             </p>
           </DropZone>
         </div>
@@ -177,6 +182,7 @@ export function UploadPage({ onUpload }: UploadPageProps) {
                     <li key={testId}>
                       <Link
                         href={`/tests/${encodeURIComponent(testId)}`}
+                        aria-label={`Test ${testId}`}
                         className="text-current underline underline-offset-2"
                       >
                         {testId}

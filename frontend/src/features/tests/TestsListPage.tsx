@@ -20,6 +20,9 @@ export type TestsListPageProps = {
   uploadHref?: string;
 };
 
+const rowGridClass =
+  "grid grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-x-4 px-3 sm:gap-x-6 sm:px-4";
+
 function RowChevron() {
   return (
     <svg viewBox="0 0 24 24" className="size-4" fill="none" aria-hidden="true">
@@ -73,70 +76,50 @@ export function TestsListPage({
         </div>
       ) : (
         <div className="overflow-hidden rounded-[var(--markr-radius)] border border-[var(--markr-border)] bg-[var(--markr-bg-elevated)]">
-          <table className="w-full border-collapse text-left">
-            <caption className="sr-only">Imported tests</caption>
-            <thead>
-              <tr className="border-b border-[var(--markr-border)]">
-                <th
-                  scope="col"
-                  className="px-3 py-2.5 text-sm font-normal text-[var(--markr-fg-muted)] sm:px-4"
+          <div
+            aria-hidden="true"
+            className={`${rowGridClass} border-b border-[var(--markr-border)] py-2.5 text-sm font-normal text-[var(--markr-fg-muted)]`}
+          >
+            <span>Test ID</span>
+            <span className="min-w-16 text-right sm:min-w-20">Students</span>
+            <span className="min-w-24 text-right sm:min-w-28">Marks available</span>
+            <span className="size-4" />
+          </div>
+          <ul aria-label="Imported tests" className="m-0 list-none p-0">
+            {tests.map((test) => {
+              const href = `/tests/${encodeURIComponent(test.test_id)}`;
+              const accessibleName = `Test ${test.test_id}, ${test.student_count} students, ${test.marks_available} marks available`;
+              return (
+                <li
+                  key={test.test_id}
+                  className="group relative border-b border-[var(--markr-border)] transition-colors last:border-b-0 hover:bg-[var(--markr-bg)] focus-within:bg-[var(--markr-bg)] focus-within:ring-2 focus-within:ring-inset focus-within:ring-[var(--markr-focus)]"
                 >
-                  Test ID
-                </th>
-                <th
-                  scope="col"
-                  className="px-3 py-2.5 text-sm font-normal text-[var(--markr-fg-muted)] sm:px-4"
-                >
-                  Students
-                </th>
-                <th
-                  scope="col"
-                  className="px-3 py-2.5 text-sm font-normal text-[var(--markr-fg-muted)] sm:px-4"
-                >
-                  Marks available
-                </th>
-                <th scope="col" className="w-10 px-3 py-2.5 sm:px-4">
-                  <span className="sr-only">Open test</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {tests.map((test) => {
-                const href = `/tests/${encodeURIComponent(test.test_id)}`;
-                return (
-                  <tr
-                    key={test.test_id}
-                    className="group relative border-b border-[var(--markr-border)] transition-colors last:border-b-0 hover:bg-[var(--markr-bg)] focus-within:bg-[var(--markr-bg)] focus-within:ring-2 focus-within:ring-inset focus-within:ring-[var(--markr-focus)]"
+                  {/*
+                    Stretched link: ::after covers the row so the whole item is clickable
+                    while keeping one real link for AT.
+                  */}
+                  <Link
+                    href={href}
+                    aria-label={accessibleName}
+                    className="block py-3 text-[var(--markr-fg)] no-underline outline-none after:absolute after:inset-0 after:content-[''] group-hover:text-[var(--markr-accent)] focus-visible:ring-0 focus-visible:ring-offset-0"
                   >
-                    <td className="px-3 py-3 sm:px-4">
-                      {/*
-                        Stretched link: ::after covers the row (tr is position:relative)
-                        so the whole row is clickable while keeping one real <a> for AT.
-                      */}
-                      <Link
-                        href={href}
-                        className="font-semibold text-[var(--markr-fg)] no-underline outline-none after:absolute after:inset-0 after:content-[''] group-hover:text-[var(--markr-accent)] focus-visible:ring-0 focus-visible:ring-offset-0"
-                      >
-                        {test.test_id}
-                      </Link>
-                    </td>
-                    <td className="px-3 py-3 text-sm tabular-nums sm:px-4 sm:text-base">
-                      {test.student_count}
-                    </td>
-                    <td className="px-3 py-3 text-sm tabular-nums sm:px-4 sm:text-base">
-                      {test.marks_available}
-                    </td>
-                    <td
-                      className="px-3 py-3 text-[var(--markr-fg-muted)] group-hover:text-[var(--markr-accent)] sm:px-4"
-                      aria-hidden="true"
-                    >
-                      <RowChevron />
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    <span aria-hidden="true" className={rowGridClass}>
+                      <span className="min-w-0 truncate font-semibold">{test.test_id}</span>
+                      <span className="min-w-16 text-right text-sm tabular-nums sm:min-w-20 sm:text-base">
+                        {test.student_count}
+                      </span>
+                      <span className="min-w-24 text-right text-sm tabular-nums sm:min-w-28 sm:text-base">
+                        {test.marks_available}
+                      </span>
+                      <span className="text-[var(--markr-fg-muted)] group-hover:text-[var(--markr-accent)]">
+                        <RowChevron />
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       )}
     </main>

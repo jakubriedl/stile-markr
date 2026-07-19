@@ -27,11 +27,17 @@ type Story = StoryObj<typeof meta>;
 export const TypicalFixture: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    expect(canvas.getByRole("group", { name: "Aggregate statistics" })).toBeInTheDocument();
-    expect(canvas.getByLabelText("Students 81")).toBeInTheDocument();
-    expect(canvas.getByLabelText("Mean 50.8% percent")).toBeInTheDocument();
-    expect(canvas.getByLabelText("Std. dev. 9.92% percentage points")).toBeInTheDocument();
-    expect(canvas.getByLabelText("Median 50% percent")).toBeInTheDocument();
+    expect(
+      canvas.getByRole("heading", { level: 2, name: "Aggregate statistics" }),
+    ).toBeInTheDocument();
+    expect(canvas.getByRole("listitem", { name: "Students: 81" })).toBeInTheDocument();
+    expect(
+      canvas.getByRole("listitem", {
+        name: "Standard deviation: 9.92 percentage points",
+      }),
+    ).toBeInTheDocument();
+    expect(canvas.getByRole("listitem", { name: "Mean: 50.8 percent" })).toBeInTheDocument();
+    expect(canvas.getByRole("listitem", { name: "Median: 50 percent" })).toBeInTheDocument();
   },
 };
 

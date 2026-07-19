@@ -11,60 +11,81 @@ export type AggregateView = {
   count: number;
 };
 
+const numberFormatter = new Intl.NumberFormat("en-AU", { maximumFractionDigits: 2 });
+
 export function formatPercent(value: number): string {
-  return `${new Intl.NumberFormat("en-AU", { maximumFractionDigits: 2 }).format(value)}%`;
+  return `${numberFormatter.format(value)}%`;
+}
+
+/** Spoken percent without a `%` character (avoids VoiceOver saying “percent” twice). */
+export function formatPercentSpoken(value: number): string {
+  return `${numberFormatter.format(value)} percent`;
 }
 
 type AggregateStatsProps = {
   aggregate: AggregateView;
 };
 
-const PERCENT_STATS: { label: string; key: keyof AggregateView; unit: "percent" }[] = [
-  { label: "Mean", key: "mean", unit: "percent" },
-  { label: "Min", key: "min", unit: "percent" },
-  { label: "Max", key: "max", unit: "percent" },
-  { label: "25th percentile", key: "p25", unit: "percent" },
-  { label: "Median", key: "p50", unit: "percent" },
-  { label: "75th percentile", key: "p75", unit: "percent" },
+const PERCENT_STATS: { label: string; key: keyof AggregateView }[] = [
+  { label: "Mean", key: "mean" },
+  { label: "Min", key: "min" },
+  { label: "Max", key: "max" },
+  { label: "25th percentile", key: "p25" },
+  { label: "Median", key: "p50" },
+  { label: "75th percentile", key: "p75" },
 ];
 
 export function AggregateStats({ aggregate }: AggregateStatsProps) {
   const stdFormatted = formatPercent(aggregate.stddev);
+  const studentsLabel = `Students: ${aggregate.count}`;
+  const stddevLabel = `Standard deviation: ${numberFormatter.format(aggregate.stddev)} percentage points`;
 
   return (
-    <div
+    <section
       className="overflow-hidden rounded-[var(--markr-radius)] border border-[var(--markr-border)] bg-[var(--markr-bg-elevated)]"
-      role="group"
-      aria-label="Aggregate statistics"
+      aria-labelledby="aggregate-heading"
     >
-      <div className="flex flex-wrap gap-x-6 gap-y-1 border-b border-[var(--markr-border)] px-3 py-2.5 sm:px-4">
-        <div className="flex items-baseline gap-2">
-          <span className="text-sm text-[var(--markr-fg-muted)]">Students</span>
+      <h2
+        id="aggregate-heading"
+        className="m-0 border-b border-[var(--markr-border)] px-3 py-2.5 text-sm font-normal text-[var(--markr-fg-muted)] sm:px-4"
+      >
+        Aggregate statistics
+      </h2>
+
+      <ul className="m-0 flex list-none flex-wrap gap-x-6 gap-y-1 border-b border-[var(--markr-border)] px-3 py-2.5 sm:px-4">
+        <li aria-label={studentsLabel} className="flex items-baseline gap-2">
+          <span aria-hidden="true" className="text-sm text-[var(--markr-fg-muted)]">
+            Students
+          </span>
           <span
+            aria-hidden="true"
             className="text-sm font-semibold tabular-nums sm:text-base"
-            aria-label={`Students ${aggregate.count}`}
           >
             {aggregate.count}
           </span>
-        </div>
-        <div className="flex items-baseline gap-2">
-          <span className="text-sm text-[var(--markr-fg-muted)]">Std. dev.</span>
+        </li>
+        <li aria-label={stddevLabel} className="flex items-baseline gap-2">
+          <span aria-hidden="true" className="text-sm text-[var(--markr-fg-muted)]">
+            Std. dev.
+          </span>
           <span
+            aria-hidden="true"
             className="text-sm font-semibold tabular-nums sm:text-base"
-            aria-label={`Std. dev. ${stdFormatted} percentage points`}
           >
             {stdFormatted}
           </span>
-        </div>
-      </div>
+        </li>
+      </ul>
 
-      <div className="grid grid-cols-2 gap-px bg-[var(--markr-border)] sm:grid-cols-3">
-        {PERCENT_STATS.map(({ label, key, unit }) => {
+      <ul className="m-0 grid list-none grid-cols-2 gap-px bg-[var(--markr-border)] p-0 sm:grid-cols-3">
+        {PERCENT_STATS.map(({ label, key }) => {
           const value = aggregate[key];
           const formatted = formatPercent(value);
+          const accessibleName = `${label}: ${formatPercentSpoken(value)}`;
           return (
-            <div
+            <li
               key={key}
+              aria-label={accessibleName}
               className="flex items-center gap-2.5 bg-[var(--markr-bg-elevated)] px-3 py-2.5 sm:gap-3 sm:px-4 sm:py-3"
             >
               <PercentDonut
@@ -72,19 +93,16 @@ export function AggregateStats({ aggregate }: AggregateStatsProps) {
                 strokeWidth={4}
                 className="size-8 shrink-0 sm:size-10"
               />
-              <div className="min-w-0">
-                <div className="truncate text-xs text-[var(--markr-fg-muted)] sm:text-sm">{label}</div>
-                <div
-                  className="text-sm font-semibold tabular-nums sm:text-base"
-                  aria-label={`${label} ${formatted} ${unit}`}
-                >
-                  {formatted}
+              <div aria-hidden="true" className="min-w-0">
+                <div className="truncate text-xs text-[var(--markr-fg-muted)] sm:text-sm">
+                  {label}
                 </div>
+                <div className="text-sm font-semibold tabular-nums sm:text-base">{formatted}</div>
               </div>
-            </div>
+            </li>
           );
         })}
-      </div>
-    </div>
+      </ul>
+    </section>
   );
 }

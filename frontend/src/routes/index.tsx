@@ -3,7 +3,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { UploadPage } from "../features/upload/UploadPage.tsx";
 import { createMarkrApi } from "../lib/api/markr-api.ts";
 
-export const Route = createFileRoute("/")({ component: Home });
+export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [{ title: "Upload exam results · Markr" }],
+  }),
+  component: Home,
+});
 
 const api = createMarkrApi();
 

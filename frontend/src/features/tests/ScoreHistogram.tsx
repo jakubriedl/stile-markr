@@ -25,16 +25,18 @@ export function ScoreHistogram({ bins }: ScoreHistogramProps) {
       <ul className="m-0 flex list-none items-stretch gap-1.5 p-0 sm:gap-2">
         {bins.map((bin) => {
           const heightPct = (bin.count / maxBin) * 100;
+          const accessibleName = `${bin.lower_pct} to ${bin.upper_pct} percent: ${bin.count} students`;
           return (
             <li
               key={`${bin.lower_pct}-${bin.upper_pct}`}
+              aria-label={accessibleName}
               className="flex min-w-0 flex-1 flex-col items-center"
             >
-              <div className="flex h-48 w-full flex-col items-center justify-end border-b border-[var(--markr-border)]">
-                <span
-                  className="mb-1 shrink-0 text-xs font-semibold tabular-nums text-[var(--markr-fg)]"
-                  aria-label={`${bin.lower_pct} to ${bin.upper_pct} percent: ${bin.count} students`}
-                >
+              <div
+                aria-hidden="true"
+                className="flex h-48 w-full flex-col items-center justify-end border-b border-[var(--markr-border)]"
+              >
+                <span className="mb-1 shrink-0 text-xs font-semibold tabular-nums text-[var(--markr-fg)]">
                   {bin.count}
                 </span>
                 <div
@@ -43,10 +45,12 @@ export function ScoreHistogram({ bins }: ScoreHistogramProps) {
                     height:
                       bin.count > 0 ? `max(0.2rem, calc(10rem * ${heightPct} / 100))` : 0,
                   }}
-                  aria-hidden="true"
                 />
               </div>
-              <span className="mt-2 w-full text-center text-[0.65rem] leading-tight text-[var(--markr-fg-muted)] sm:text-xs">
+              <span
+                aria-hidden="true"
+                className="mt-2 w-full text-center text-[0.65rem] leading-tight text-[var(--markr-fg-muted)] sm:text-xs"
+              >
                 {bin.lower_pct}–{bin.upper_pct}%
               </span>
             </li>

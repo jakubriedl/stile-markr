@@ -46,7 +46,7 @@ export function TestDetailPage({
   if (notFound) {
     return (
       <main className="flex flex-col gap-4">
-        <PageHeading>Test {testId}</PageHeading>
+        <PageHeading>{`Test ${testId}`}</PageHeading>
         <p className="m-0">This test was not found.</p>
         <Link href={testsHref}>Back to tests</Link>
       </main>
@@ -56,7 +56,7 @@ export function TestDetailPage({
   return (
     <main className="flex flex-col gap-6" aria-busy={loading || undefined}>
       <header className="flex items-start justify-between gap-4">
-        <PageHeading>Test {testId}</PageHeading>
+        <PageHeading>{`Test ${testId}`}</PageHeading>
         <div className="flex items-center gap-1">
           <RefreshStatusTag
             lastRefreshedAt={lastRefreshedAt}

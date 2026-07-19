@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, waitFor, within } from "storybook/test";
+import { expect, within } from "storybook/test";
 
 import { formatLastRefreshed } from "../../lib/live-state/displayed-snapshots.ts";
 import { RefreshStatusTag } from "./RefreshStatusTag.tsx";
@@ -22,7 +22,9 @@ export const HiddenUntilSettled: Story = {
     lastRefreshedAt: null,
   },
   play: async ({ canvasElement }) => {
-    expect(within(canvasElement).queryByRole("button")).toBeNull();
+    const canvas = within(canvasElement);
+    expect(canvas.queryByRole("img")).toBeNull();
+    expect(canvas.queryByRole("button")).toBeNull();
   },
 };
 
@@ -33,16 +35,11 @@ export const Live: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const refreshed = formatLastRefreshed("2026-07-18T10:00:00.000Z");
-    const tag = canvas.getByRole("button", {
-      name: `Live. Last refreshed: ${refreshed}`,
-    });
+    const accessibleName = `Live. Last refreshed: ${refreshed}`;
+    const tag = canvas.getByRole("img", { name: accessibleName });
     expect(tag).toBeInTheDocument();
-    // Tooltip portals outside the story root.
-    await waitFor(() => {
-      expect(within(document.body).getByRole("tooltip")).toHaveTextContent(
-        `Last refreshed: ${refreshed}`,
-      );
-    });
+    expect(canvas.queryByRole("button", { name: accessibleName })).toBeNull();
+    expect(canvas.getByText(`Last refreshed: ${refreshed}`)).toBeInTheDocument();
   },
 };
 
@@ -53,7 +50,8 @@ export const Reconnecting: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    expect(canvas.getByRole("button", { name: /Reconnecting/ })).toBeInTheDocument();
-    expect(canvas.queryByRole("button", { name: /^Live/ })).not.toBeInTheDocument();
+    expect(canvas.getByRole("img", { name: /Reconnecting\. Last refreshed:/ })).toBeInTheDocument();
+    expect(canvas.queryByRole("img", { name: /^Live\./ })).toBeNull();
+    expect(canvas.queryByRole("button", { name: /Reconnecting/ })).toBeNull();
   },
 };

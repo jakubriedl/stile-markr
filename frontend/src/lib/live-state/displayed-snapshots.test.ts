@@ -4,7 +4,7 @@ import {
   detailChangeAnnouncement,
   fingerprintTestDetail,
   fingerprintTestsList,
-  formatLastRefreshedUtc,
+  formatLastRefreshed,
   listChangeAnnouncement,
   syncRefreshFromPoll,
 } from "./displayed-snapshots.ts";
@@ -167,8 +167,12 @@ describe("displayed snapshots", () => {
     expect(synced.nextFingerprint).toBe("same");
   });
 
-  it("formats last refreshed timestamps in en-AU UTC", () => {
-    expect(formatLastRefreshedUtc(null)).toBe("Not yet refreshed");
-    expect(formatLastRefreshedUtc("2026-07-18T10:00:00.000Z")).toBe("18 July 2026, 10:00:00 UTC");
+  it("formats last refreshed timestamps in the local timezone with en-AU", () => {
+    expect(formatLastRefreshed(null)).toBe("Not yet refreshed");
+    const formatted = formatLastRefreshed("2026-07-18T10:00:00.000Z");
+    expect(formatted).toMatch(/18 July 2026/);
+    expect(formatted).not.toMatch(/T10:00:00\.000Z/);
+    // Timezone abbreviation or offset label from Intl (e.g. AEST, GMT+10, UTC).
+    expect(formatted).toMatch(/[A-Z]{2,5}|GMT[+-]\d+/);
   });
 });

@@ -1,6 +1,6 @@
 import { Button, Tooltip, TooltipTrigger } from "react-aria-components";
 
-import { formatLastRefreshedUtc } from "../../lib/live-state/displayed-snapshots.ts";
+import { formatLastRefreshed } from "../../lib/live-state/displayed-snapshots.ts";
 
 export type RefreshStatusTagProps = {
   lastRefreshedAt: string | null;
@@ -26,7 +26,7 @@ export function RefreshStatusTag({
 
   const isLive = !stale && lastRefreshedAt != null;
   const label = isLive ? "Live" : "Reconnecting";
-  const tooltip = `Last refreshed: ${formatLastRefreshedUtc(lastRefreshedAt)}`;
+  const tooltip = `Last refreshed: ${formatLastRefreshed(lastRefreshedAt)}`;
 
   return (
     <TooltipTrigger delay={300} closeDelay={100} defaultOpen={defaultOpen}>

@@ -175,7 +175,7 @@ An explicit live-state reducer—not render timing—controls announcements:
 - announce recovery once; and
 - keep `last refreshed` outside live regions.
 
-Dates and percentages use `en-AU`. Visible refresh timestamps use a fixed, explicitly labelled UTC format on server and client.
+Dates and percentages use `en-AU`. Visible refresh timestamps use `en-AU` formatting in the viewer's local timezone with an explicit timezone label (client-rendered after poll settle to avoid SSR/client timezone mismatch).
 
 ### 7.4 UI system
 

@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { formatLastRefreshed } from "../../lib/live-state/displayed-snapshots.ts";
 import { RefreshStatusTag } from "./RefreshStatusTag.tsx";
 
 describe("RefreshStatusTag", () => {
@@ -10,15 +11,14 @@ describe("RefreshStatusTag", () => {
   });
 
   it("shows a focusable Live tag and exposes last refreshed in the tooltip", () => {
+    const refreshed = formatLastRefreshed("2026-07-18T10:00:00.000Z");
     render(<RefreshStatusTag lastRefreshedAt="2026-07-18T10:00:00.000Z" settled defaultOpen />);
 
     const tag = screen.getByRole("button", {
-      name: /Live\. Last refreshed: 18 July 2026, 10:00:00 UTC/,
+      name: `Live. Last refreshed: ${refreshed}`,
     });
     expect(tag).toBeInTheDocument();
-    expect(screen.getByRole("tooltip")).toHaveTextContent(
-      "Last refreshed: 18 July 2026, 10:00:00 UTC",
-    );
+    expect(screen.getByRole("tooltip")).toHaveTextContent(`Last refreshed: ${refreshed}`);
 
     tag.focus();
     expect(tag).toHaveFocus();

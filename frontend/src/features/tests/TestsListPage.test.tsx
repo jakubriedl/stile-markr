@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
+import { formatLastRefreshed } from "../../lib/live-state/displayed-snapshots.ts";
 import { TestsListPage } from "./TestsListPage.tsx";
 
 describe("TestsListPage", () => {
@@ -29,7 +30,7 @@ describe("TestsListPage", () => {
 
     expect(
       screen.getByRole("button", {
-        name: /Reconnecting\. Last refreshed: 18 July 2026, 10:00:00 UTC/,
+        name: `Reconnecting. Last refreshed: ${formatLastRefreshed("2026-07-18T10:00:00.000Z")}`,
       }),
     ).toBeInTheDocument();
     expect(screen.getByText(/Unable to refresh/)).toBeInTheDocument();

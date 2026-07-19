@@ -126,7 +126,6 @@ export function syncRefreshFromPoll(input: PollSyncInput): PollSyncResult {
 }
 
 const lastRefreshedFormatter = new Intl.DateTimeFormat("en-AU", {
-  timeZone: "UTC",
   day: "numeric",
   month: "short",
   year: "numeric",
@@ -134,10 +133,11 @@ const lastRefreshedFormatter = new Intl.DateTimeFormat("en-AU", {
   minute: "2-digit",
   second: "2-digit",
   hour12: false,
+  timeZoneName: "short",
 });
 
-/** Visible last-refreshed copy with fixed en-AU UTC formatting (LIST-007 / DETAIL-009). */
-export function formatLastRefreshedUtc(isoTimestamp: string | null): string {
+/** Visible last-refreshed copy in the viewer's local timezone with en-AU formatting (LIST-007 / DETAIL-009). */
+export function formatLastRefreshed(isoTimestamp: string | null): string {
   if (isoTimestamp == null) {
     return "Not yet refreshed";
   }
@@ -146,5 +146,5 @@ export function formatLastRefreshedUtc(isoTimestamp: string | null): string {
   if (Number.isNaN(parsed)) {
     return "Not yet refreshed";
   }
-  return `${lastRefreshedFormatter.format(parsed)} UTC`;
+  return lastRefreshedFormatter.format(parsed);
 }

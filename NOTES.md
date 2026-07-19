@@ -100,7 +100,7 @@ Full metrics and tracing are out of scope, but the backend should expose `GET /h
 - Both the tests list and test detail update within ten seconds. Announcements occur only after initial load and only when retained/displayed data changes.
 - Detail announcements say results were updated and include the current student total. List announcements summarize the change and current test count.
 - Failed live refreshes retain stale data, announce the stale transition once, keep retrying, and announce recovery once.
-- Visible `last refreshed` values represent the last successful refresh and are not live regions.
+- Visible `last refreshed` values represent the last successful refresh, use `en-AU` formatting in the viewer's local timezone with a timezone label, and are not live regions.
 - Displayed percentages include `%` and use at most two decimal places, without changing API precision.
 - The frontend must conform to WCAG 2.2 AA, support keyboard-only operation with visible focus, and honor reduced-motion preferences.
 
@@ -136,7 +136,7 @@ The foundation compatibility gate completed on 2026-07-18 with Bun 1.3.11 select
 
 TanStack Start will server-render the initial routes and data, then hydrate in the browser. Server loaders call the Hono backend directly over the internal network. Hydrated browser code calls same-origin `/api/*` routes on the frontend service; the proxy strips `/api`, streams bodies and responses without parsing, forwards only required headers plus request/trace context, and applies origin and timeout protections. The Hono app type is the TypeScript contract through Hono RPC rather than a separate contracts package or generated OpenAPI client.
 
-TanStack Query owns SSR prefetch/dehydration, cache state, five-second polling, retries, and stale state. Aggregate and histogram requests may be eventually consistent across a commit boundary; that transient mismatch is accepted. Each endpoint still emits an ETag and supports `If-None-Match`/304. SSR and browser presentation use fixed `en-AU` formatting, and refresh timestamps are displayed in explicitly labelled UTC to prevent hydration differences.
+TanStack Query owns SSR prefetch/dehydration, cache state, five-second polling, retries, and stale state. Aggregate and histogram requests may be eventually consistent across a commit boundary; that transient mismatch is accepted. Each endpoint still emits an ETag and supports `If-None-Match`/304. SSR and browser presentation use fixed `en-AU` formatting. Refresh timestamps are shown in the viewer's local timezone (with a timezone label) and are only rendered after the first client poll settles, so SSR/client timezone mismatch is avoided.
 
 <a id="note-arch-003"></a>
 

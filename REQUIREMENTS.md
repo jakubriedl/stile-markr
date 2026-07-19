@@ -310,7 +310,7 @@ Comments and narrative in supporting files are not requirements unless this docu
   Decision: [`NOTE-REQ-007`](NOTES.md#note-req-007).
 - **LIST-006 (Added):** No list-change announcement occurs on initial load. Afterward, when displayed list data changes, a polite announcement must state that the list changed and give the current test count. Refreshes that do not change displayed list data must not announce a change.
   Decision: [`NOTE-REQ-007`](NOTES.md#note-req-007).
-- **LIST-007 (Added):** The page must show a visible `last refreshed` value representing the most recent successful refresh. It must not be a live region.
+- **LIST-007 (Clarified):** The page must show a visible `last refreshed` value representing the most recent successful refresh. It must use `en-AU` formatting in the viewer's local timezone (with a timezone label), and must not be a live region.
   Decision: [`NOTE-REQ-007`](NOTES.md#note-req-007).
 - **LIST-008 (Added):** If a refresh fails after data loaded, the page must retain stale data, visibly identify it as stale, announce the stale transition once, continue retrying, and announce recovery once. Repeated failures must not cause repeated announcements.
   Decision: [`NOTE-REQ-007`](NOTES.md#note-req-007).
@@ -333,7 +333,7 @@ Comments and narrative in supporting files are not requirements unless this docu
   Decision: [`NOTE-REQ-007`](NOTES.md#note-req-007).
 - **DETAIL-008 (Supplied, clarified):** No result-change announcement occurs on initial load. Afterward, a polite announcement must state that results were updated and give the current student total; it must not recite all statistics.
   Source: `task/README.md:153`. Decision: [`NOTE-REQ-007`](NOTES.md#note-req-007).
-- **DETAIL-009 (Supplied, clarified):** A separate visible `last refreshed` value must represent the most recent successful refresh and must not be a live region.
+- **DETAIL-009 (Supplied, clarified):** A separate visible `last refreshed` value must represent the most recent successful refresh. It must use `en-AU` formatting in the viewer's local timezone (with a timezone label), and must not be a live region.
   Source: `task/README.md:154`. Decision: [`NOTE-REQ-007`](NOTES.md#note-req-007).
 - **DETAIL-010 (Clarified):** If a refresh fails after data loaded, the page must retain stale data, visibly identify it as stale, announce the stale transition once, continue retrying, and announce recovery once.
   Decision: [`NOTE-REQ-007`](NOTES.md#note-req-007).

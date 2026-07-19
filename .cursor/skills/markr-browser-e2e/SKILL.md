@@ -59,7 +59,7 @@ Do not replace the primary successful upload scenario with curl.
 - Verify visible data changes within ten seconds.
 - Verify exactly one appropriate change announcement and no announcement on initial/no-op refresh.
 - Stop the backend, verify stale data remains and failure is announced once, keep waiting through another poll, then restart and verify one recovery announcement.
-- Verify `last refreshed` is visible UTC text and is not a live region.
+- Verify `last refreshed` is visible local-timezone text (en-AU, with timezone label) and is not a live region.
 
 ### Accessibility and presentation
 

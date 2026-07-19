@@ -163,7 +163,7 @@ describe("Bun TanStack Start runtime", () => {
       await page
         .getByRole("heading", { name: "Upload exam results" })
         .waitFor({ state: "visible" });
-      await page.getByRole("link", { name: "View tests" }).click();
+      await page.getByRole("link", { name: "Tests" }).click();
       await page.getByRole("heading", { name: "Tests" }).waitFor({ state: "visible" });
 
       const navigationCount = await page.evaluate(

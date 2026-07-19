@@ -5,6 +5,8 @@ const encoder = new TextEncoder();
 let observedRequestBytes = 0;
 let responseStreamController: ReadableStreamDefaultController<Uint8Array> | undefined;
 const app = new Hono()
+  // Minimal product stubs so SPA client navigation does not 404 in the hydrate check.
+  .get("/tests", (event) => event.json({ tests: [] }))
   .post("/stream", async (event) => {
     const reader = event.req.raw.body?.getReader();
     let bytes = 0;

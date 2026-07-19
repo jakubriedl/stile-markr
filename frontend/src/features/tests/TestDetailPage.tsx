@@ -5,7 +5,8 @@ import { FullscreenButton } from "../../components/ui/FullscreenButton.tsx";
 import { RefreshStatusTag } from "../../components/ui/RefreshStatusTag.tsx";
 import { AggregateStats, type AggregateView } from "./AggregateStats.tsx";
 import { ScoreHistogram } from "./ScoreHistogram.tsx";
-import { AggregateStatsSkeleton, ScoreHistogramSkeleton } from "./TestDetailSkeletons.tsx";
+import { AggregateStatsSkeleton } from "./AggregateStatsSkeleton.tsx";
+import { ScoreHistogramSkeleton } from "./ScoreHistogramSkeleton.tsx";
 
 export type { AggregateView };
 

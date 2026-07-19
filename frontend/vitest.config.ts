@@ -57,6 +57,9 @@ export default defineConfig({
       },
       {
         extends: true,
+        optimizeDeps: {
+          include: ["@tanstack/react-router", "@tanstack/react-query"],
+        },
         plugins: [
           storybookTest({
             configDir: join(currentDirectory, ".storybook"),

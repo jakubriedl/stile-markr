@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 
 import { Alert } from "./Alert.tsx";
 
 const meta = {
-  title: "UI/Alert",
+  title: "Components/Alert",
   component: Alert,
   args: {
     children: "Choose an XML file before uploading.",
@@ -13,12 +14,33 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Danger: Story = {};
+export const AssertiveDanger: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    expect(canvas.getByRole("alert")).toHaveAttribute("aria-live", "assertive");
+  },
+};
 
-export const Success: Story = {
+export const PoliteSuccess: Story = {
   args: {
     tone: "polite",
     variant: "success",
     children: "Imported 81 unique results.",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    expect(canvas.getByRole("status")).toHaveAttribute("aria-live", "polite");
+  },
+};
+
+export const Neutral: Story = {
+  args: {
+    tone: "polite",
+    variant: "neutral",
+    children: "Unable to refresh. Showing previously loaded data.",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    expect(canvas.getByRole("status")).toBeInTheDocument();
   },
 };

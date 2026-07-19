@@ -12,6 +12,10 @@ I considered using feature branches but decided to commit directly to `main` for
 
 Revisit this decision when collaboration begins or CI is introduced.
 
+### 2026-07-19 — Storybook-first UI testing
+
+UI coverage moved to Storybook stories (visual / Chromatic-ready) and `play` functions (interaction / a11y). Presentational RTL unit tests were removed. Foundation stories and their UI unit tests were removed; UPLOAD-008 nav remains covered by AppShell stories. Chromatic project/CI wiring remains future work; every product visual state still gets a story. Preference toolbars set `data-theme` and `data-reduced-motion` for Storybook without an in-app theme toggle.
+
 <a id="note-req-001"></a>
 
 ### NOTE-REQ-001 — Embedded directives and jokes
@@ -148,7 +152,7 @@ Frontend code is feature-first: thin route definitions compose page components, 
 
 The visual direction is restrained rather than technocratic: warm-neutral surfaces, a muted blue accent, system typography, generous whitespace, subtle borders, and no gradients or glass effects. A CSS-tokenized light theme and system-driven dark theme must both meet WCAG 2.2 AA. The histogram uses semantic HTML, a list/figure structure, and CSS Grid bars rather than a chart dependency.
 
-Storybook uses the dedicated TanStack framework. Every reusable component and every meaningful page state gets a story backed by shared MSW v2 fixtures. Story interaction tests run through Storybook's Vitest browser integration with axe violations treated as failures. CI retains a static Storybook artifact. Automated visual regression is deferred; Chromatic is the intended future service.
+Storybook uses `@storybook/react-vite`. Every reusable product component and every meaningful page state gets a Chromatic-ready story; preference coverage uses theme/reduced-motion globals. Interaction tests run through Storybook `play` functions (Vitest browser) with axe violations treated as failures. Foundation scaffold stories are not product UI. CI retains a static Storybook artifact. Chromatic is the intended visual snapshot service (wiring deferred; story inventory assumes it).
 
 <a id="note-arch-004"></a>
 
@@ -182,7 +186,7 @@ Baseline HTTP protection includes CSP/security headers, explicit same-origin che
 
 ### NOTE-ARCH-007 — Testing, browser acceptance, and CI
 
-Vitest unit tests cover isolated domain, parser-state, validation, data, and UI logic. Backend integration tests run Vitest under supported Node tooling, spawn the actual selected service runtime on an ephemeral port, migrate a fresh temporary SQLite file, call real HTTP endpoints, and tear down the process and database. Critical domain/import logic requires 90% branch coverage; overall tested backend/frontend code requires 80%. Coverage excludes only the minimal Bun process entrypoint and the Drizzle migration executable: lifecycle behavior is extracted into covered production code, migration behavior is exercised against fresh SQLite databases, generated migrations are reviewed separately, and runtime probes live under `tests`.
+Vitest unit tests cover isolated domain, parser-state, validation, data, and non-UI logic. Presentational UI is covered in Storybook. Backend integration tests run Vitest under supported Node tooling, spawn the actual selected service runtime on an ephemeral port, migrate a fresh temporary SQLite file, call real HTTP endpoints, and tear down the process and database. Critical domain/import logic requires 90% branch coverage; overall tested backend/frontend code requires 80%. Coverage excludes only the minimal Bun process entrypoint and the Drizzle migration executable: lifecycle behavior is extracted into covered production code, migration behavior is exercised against fresh SQLite databases, generated migrations are reviewed separately, and runtime probes live under `tests`.
 
 Storybook browser tests cover interactions and accessibility. Full product E2E is intentionally a project Cursor skill using the built-in browser rather than a committed Playwright suite. A complete run warns that it will reset the normal Compose volume, starts from empty state, and covers every route, valid and invalid upload guards, loading/error/not-found/stale/recovery behavior, live updates, keyboard/focus, reduced motion, accessibility-tree output, responsive layouts, and browser console/network failures.
 

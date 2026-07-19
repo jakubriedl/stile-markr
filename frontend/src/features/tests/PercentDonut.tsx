@@ -6,6 +6,10 @@ export type PercentDonutProps = {
   className?: string;
 };
 
+export function clampPercent(value: number): number {
+  return Math.min(100, Math.max(0, value));
+}
+
 /** Decorative 0–100% ring. Keep the numeric value in accessible text beside/over it. */
 export function PercentDonut({
   value,
@@ -13,7 +17,7 @@ export function PercentDonut({
   strokeWidth = 6,
   className = "size-14",
 }: PercentDonutProps) {
-  const clamped = Math.min(100, Math.max(0, value));
+  const clamped = clampPercent(value);
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference * (1 - clamped / 100);

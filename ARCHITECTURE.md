@@ -191,17 +191,18 @@ The histogram is a semantic `<figure>` containing a labelled list. Each list ite
 
 ### 7.5 Storybook and MSW
 
-Storybook uses the dedicated TanStack React framework at the same locked version across all Storybook packages.
+Storybook uses `@storybook/react-vite` at the same locked version across all Storybook packages.
 
 - Application and Storybook share global tokens/styles but maintain separate Vite composition.
-- CSF3 stories are colocated with components and page screens.
-- Stories cover empty, loading, populated, success, invalid input, server error, network error, stale, recovery, changed data, not found, reduced motion, light, and dark states where applicable.
+- CSF3 stories are colocated with components and page screens. Every product UI component and every meaningful page state has a story (Chromatic-ready visual baseline). Foundation scaffolding is not a Storybook surface.
+- Stories cover empty, loading, populated, success, invalid input, server error, network error, stale, recovery, changed data, not found, and each distinct control visual variant where applicable.
+- Theme (`light` / `dark` / `system`) and reduced-motion preferences are Storybook **globals** (toolbar + `data-theme` / `data-reduced-motion` decorators), not duplicated story exports. Chromatic modes can capture combinations later.
 - Shared pure fixture builders and MSW v2 handler factories live under `frontend/src/mocks`.
 - Storybook uses `mswLoader`; unit/browser tests reset handlers and treat unhandled API requests as failures.
 - MSW is never active in production or full-stack browser acceptance.
-- Storybook interaction tests use its Vitest browser integration and Testing Library semantics.
+- **Stories** are the visual contract; **`play` functions** are the interaction and accessibility runner (Vitest browser + Testing Library). Vitest unit tests cover logic and awkward browser APIs only (for example Fullscreen API mocks), not presentational RTL markup checks.
 - Automated axe violations fail tests, but manual keyboard and screen-reader review remains required.
-- CI builds and uploads static Storybook. Visual snapshot gating is deferred; Chromatic is the intended future path.
+- CI builds and uploads static Storybook. Chromatic (or equivalent) is the intended visual snapshot gate; stories must remain snapshot-ready even before Chromatic CI is wired.
 
 ## 8. Backend architecture
 

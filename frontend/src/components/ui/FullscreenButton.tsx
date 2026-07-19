@@ -72,10 +72,18 @@ function CompressIcon() {
   );
 }
 
-export function FullscreenButton() {
+export type FullscreenButtonProps = {
+  /** Forces enter/exit visual state for Storybook; omit in production. */
+  forcedActive?: boolean;
+};
+
+export function FullscreenButton({ forcedActive }: FullscreenButtonProps) {
   const [active, setActive] = useState(false);
 
   useEffect(() => {
+    if (forcedActive !== undefined) {
+      return;
+    }
     const sync = () => {
       setActive(getFullscreenElement()?.id === PAGE_CONTENT_ELEMENT_ID);
     };
@@ -86,20 +94,25 @@ export function FullscreenButton() {
       document.removeEventListener("fullscreenchange", sync);
       document.removeEventListener("webkitfullscreenchange", sync);
     };
-  }, []);
+  }, [forcedActive]);
+
+  const isActive = forcedActive ?? active;
 
   return (
     <AriaButton
-      aria-label={active ? "Exit full screen" : "Enter full screen"}
-      aria-pressed={active}
+      aria-label={isActive ? "Exit full screen" : "Enter full screen"}
+      aria-pressed={isActive}
       onPress={() => {
+        if (forcedActive !== undefined) {
+          return;
+        }
         const target = document.getElementById(PAGE_CONTENT_ELEMENT_ID);
         if (!target) return;
-        void (active ? exitFullscreen() : requestFullscreen(target));
+        void (isActive ? exitFullscreen() : requestFullscreen(target));
       }}
       className="inline-flex size-9 items-center justify-center rounded-[var(--markr-radius)] text-[var(--markr-fg-muted)] outline-none transition-colors hover:text-[var(--markr-fg)] focus-visible:ring-2 focus-visible:ring-[var(--markr-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--markr-bg)]"
     >
-      {active ? <CompressIcon /> : <ExpandIcon />}
+      {isActive ? <CompressIcon /> : <ExpandIcon />}
     </AriaButton>
   );
 }

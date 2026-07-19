@@ -46,6 +46,7 @@ Application implementation is in progress on `main`, with Compose/CI landed and 
 
 - Use ESM-only strict TypeScript, pnpm, Turborepo, Oxfmt, and Oxlint as documented in `ARCHITECTURE.md`.
 - Add tests with implementation. Critical import/domain logic targets 90% branch coverage; overall tested code targets 80%.
+- UI changes must add or update Storybook stories for every visible state (Chromatic-ready). Add `play` functions for interactions and a11y assertions. Do not add new RTL UI unit tests for presentational rendering; keep Vitest unit tests for logic and awkward browser APIs only.
 - Keep XML, names, student numbers, and request bodies out of logs, spans, metrics, snapshots, and errors.
 - Run React Doctor after frontend changes once the foundation task installs it.
 - Use `markr-browser-e2e` only when destructive full-stack acceptance is explicitly requested; it deletes the normal Compose volume.
@@ -55,5 +56,6 @@ Application implementation is in progress on `main`, with Compose/CI landed and 
 - Narrow package checks: `pnpm --filter @markr/backend test`, `pnpm --filter @markr/frontend test`, and the corresponding `typecheck` script.
 - Real-process checks: `pnpm test:integration`.
 - Frontend review: `pnpm react:doctor` for the full tree, `pnpm react:doctor:changed` for an incremental check, `pnpm test:storybook`, `pnpm storybook:build`, and `pnpm --filter @markr/frontend build`.
+- UI loop: `pnpm test:storybook` (plays + axe); Storybook build remains a CI artifact gate.
 - Full local gate: `pnpm validate`, followed by `pnpm test:integration` and the Storybook build.
 - CI installs with `pnpm install --frozen-lockfile`.

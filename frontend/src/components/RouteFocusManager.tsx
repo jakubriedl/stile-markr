@@ -1,4 +1,4 @@
-import { useRouterState } from "@tanstack/react-router";
+import { useRouterState, type RegisteredRouter } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 
 import { PAGE_HEADING_ELEMENT_ID } from "./page-heading-id.ts";
@@ -6,6 +6,8 @@ import { PAGE_HEADING_ELEMENT_ID } from "./page-heading-id.ts";
 export { PAGE_HEADING_ELEMENT_ID };
 
 const MAX_FOCUS_ATTEMPTS = 12;
+
+type AppRouterState = RegisteredRouter["state"];
 
 function focusPageHeading(): boolean {
   const heading = document.getElementById(PAGE_HEADING_ELEMENT_ID);
@@ -22,8 +24,12 @@ function focusPageHeading(): boolean {
  * Retries across frames so focus is not lost while the new route commits.
  */
 export function RouteFocusManager() {
-  const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const status = useRouterState({ select: (state) => state.status });
+  const pathname = useRouterState({
+    select: (state: AppRouterState) => state.location.pathname,
+  });
+  const status = useRouterState({
+    select: (state: AppRouterState) => state.status,
+  });
   const isFirstIdle = useRef(true);
 
   useEffect(() => {

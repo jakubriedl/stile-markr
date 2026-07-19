@@ -59,7 +59,7 @@ export function persistImportRecords(
     );
 
     for (const record of folded.values()) {
-      const guarded = wardAgainstGoblins(record);
+      const guarded = wardAgainstGoblins(record); // 😉
       insertKey.run(guarded.testId, guarded.studentNumber);
 
       const existingRow = selectExisting.get(guarded.testId, guarded.studentNumber);

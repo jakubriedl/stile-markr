@@ -59,9 +59,11 @@ function AppShellHost({ path, children }: { path: string; children: ReactNode })
 
 /** File-level decorator: wraps page stories in AppShell + memory router. */
 export function withAppShell(path: string): Decorator {
-  return (Story) => (
-    <AppShellHost path={path}>
-      <Story />
-    </AppShellHost>
-  );
+  return function WithAppShellDecorator(Story: Parameters<Decorator>[0]) {
+    return (
+      <AppShellHost path={path}>
+        <Story />
+      </AppShellHost>
+    );
+  };
 }

@@ -3,7 +3,8 @@
   "compilerOptions": {
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "rootDir": ".",
-    "types": ["bun", "node"]
+    "types": ["bun", "node"],
+    "noImplicitAny": true
   },
   "include": ["src/**/*.ts", "tests/**/*.ts", "vitest.config.ts", "drizzle.config.ts"]
 }

@@ -30,7 +30,8 @@ afterEach(async () => {
 describe("Bun TanStack Start runtime", () => {
   it(
     "hydrates, streams the proxy, applies headers, and blocks host escape",
-    { timeout: 20_000 },
+    // CI cold-starts Bun servers + Chromium; 20s is too tight on shared runners.
+    { timeout: 60_000 },
     async () => {
       const backend = spawn("bun", ["tests/runtime/server.ts"], {
         cwd: backendDirectory,

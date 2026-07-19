@@ -1,7 +1,7 @@
-import { Alert } from "../../components/ui/Alert.tsx";
 import { PageHeading } from "../../components/ui/Heading.tsx";
 import { Link } from "../../components/ui/Link.tsx";
 import { FullscreenButton } from "../../components/ui/FullscreenButton.tsx";
+import { RefreshNotice } from "../../components/ui/RefreshNotice.tsx";
 import { RefreshStatusTag } from "../../components/ui/RefreshStatusTag.tsx";
 import { AggregateStats, type AggregateView } from "./AggregateStats.tsx";
 import { ScoreHistogram } from "./ScoreHistogram.tsx";
@@ -67,35 +67,19 @@ export function TestDetailPage({
         </div>
       </header>
 
-      {announcement ? (
-        <Alert tone="polite" variant="neutral">
-          {announcement}
-        </Alert>
-      ) : null}
-
-      {error ? (
-        <Alert>
-          <div className="flex flex-col gap-2">
-            <span>{error}</span>
-            {onRetry ? (
-              <button
-                type="button"
-                onClick={onRetry}
-                className="w-fit font-semibold text-[var(--markr-accent)] underline"
-              >
-                Retry
-              </button>
-            ) : null}
-          </div>
-        </Alert>
-      ) : null}
+      <RefreshNotice
+        stale={stale}
+        announcement={announcement}
+        error={error}
+        onRetry={onRetry}
+      />
 
       {loading ? (
         <>
           <AggregateStatsSkeleton />
           <ScoreHistogramSkeleton />
         </>
-      ) : (
+      ) : error ? null : (
         <>
           {aggregate ? <AggregateStats aggregate={aggregate} /> : null}
           <ScoreHistogram bins={bins} />

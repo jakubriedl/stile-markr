@@ -20,13 +20,19 @@ export function Alert({ children, tone = "assertive", variant = "danger" }: Aler
       : variant === "success"
         ? "var(--markr-success)"
         : "var(--markr-fg)";
+  const border =
+    variant === "danger"
+      ? "var(--markr-danger)"
+      : variant === "success"
+        ? "var(--markr-success)"
+        : "var(--markr-border)";
 
   return (
     <div
       role={tone === "assertive" ? "alert" : "status"}
       aria-live={tone}
-      className="rounded-[var(--markr-radius)] border border-[var(--markr-border)] px-3 py-2 font-[family-name:var(--markr-font-sans)] text-sm"
-      style={{ background, color: foreground }}
+      className="rounded-[var(--markr-radius)] border px-3 py-2 font-[family-name:var(--markr-font-sans)] text-sm"
+      style={{ background, color: foreground, borderColor: border }}
     >
       {children}
     </div>

@@ -114,7 +114,11 @@ function TestDetailLive({ testId }: { testId: string }) {
       announcement={session.refresh.announcement}
       notFound={notFound}
       loading={loading}
-      error={isError && aggregateQuery.data == null ? "Unable to load test details." : null}
+      error={
+        isError && aggregateQuery.data == null
+          ? "Couldn't load this test. Check your connection and try again."
+          : null
+      }
       onRetry={() => {
         void aggregateQuery.refetch();
         void histogramQuery.refetch();

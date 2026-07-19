@@ -66,7 +66,11 @@ function TestsRoute() {
       lastRefreshedAt={refresh.lastRefreshedAt}
       stale={refresh.phase === "stale"}
       announcement={refresh.announcement}
-      error={query.isError && !query.data ? "Unable to load tests." : null}
+      error={
+        query.isError && !query.data
+          ? "Couldn't load the test list. Check your connection and try again."
+          : null
+      }
       onRetry={() => {
         void query.refetch();
       }}

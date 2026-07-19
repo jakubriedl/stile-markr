@@ -121,8 +121,9 @@ export function UploadPage({ onUpload }: UploadPageProps) {
             className={({ isDropTarget, isFocusVisible, isDisabled }) =>
               [
                 "flex flex-col items-center justify-center gap-3 rounded-[var(--markr-radius)] border border-dashed px-4 py-8 text-center outline-none transition-colors",
+                // Avoid opacity on the whole zone — it tanks muted-text contrast under axe.
                 isDisabled
-                  ? "cursor-not-allowed border-[var(--markr-border)] opacity-60"
+                  ? "cursor-not-allowed border-[var(--markr-border)]"
                   : "border-[var(--markr-border)] hover:border-[var(--markr-accent)] hover:bg-[var(--markr-bg)]",
                 isDropTarget
                   ? "border-[var(--markr-accent)] bg-[var(--markr-bg)] ring-2 ring-[var(--markr-focus)]"

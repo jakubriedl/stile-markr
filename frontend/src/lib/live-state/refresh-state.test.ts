@@ -11,7 +11,8 @@ describe("reduceRefreshState", () => {
 
     const stale = reduceRefreshState(loaded, { type: "failure" });
     expect(stale.phase).toBe("stale");
-    expect(stale.announcement).toMatch(/Unable to refresh/);
+    // Stale copy is shown by RefreshNotice; reducer keeps announcement empty.
+    expect(stale.announcement).toBeNull();
 
     const staleAgain = reduceRefreshState(stale, { type: "failure" });
     expect(staleAgain.announcement).toBeNull();
@@ -21,7 +22,7 @@ describe("reduceRefreshState", () => {
       at: "2026-07-18T10:00:00.000Z",
     });
     expect(recovered.phase).toBe("fresh");
-    expect(recovered.announcement).toMatch(/Connection restored/);
+    expect(recovered.announcement).toBe("Back online. Results are up to date.");
     expect(recovered.lastRefreshedAt).toBe("2026-07-18T10:00:00.000Z");
   });
 

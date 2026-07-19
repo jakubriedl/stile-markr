@@ -81,7 +81,7 @@ describe("detail live session", () => {
       at: "2026-07-18T10:00:01.000Z",
     });
     expect(session.refresh.phase).toBe("stale");
-    expect(session.refresh.announcement).toBe("Unable to refresh. Showing previously loaded data.");
+    expect(session.refresh.announcement).toBeNull();
 
     session = applyDetailPollTransition(session, {
       testId: "9864",

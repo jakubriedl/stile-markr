@@ -1,7 +1,7 @@
-import { Alert } from "../../components/ui/Alert.tsx";
 import { PageHeading } from "../../components/ui/Heading.tsx";
 import { Link } from "../../components/ui/Link.tsx";
 import { FullscreenButton } from "../../components/ui/FullscreenButton.tsx";
+import { RefreshNotice } from "../../components/ui/RefreshNotice.tsx";
 import { RefreshStatusTag } from "../../components/ui/RefreshStatusTag.tsx";
 
 export type TestListItemView = {
@@ -57,30 +57,14 @@ export function TestsListPage({
         </div>
       </header>
 
-      {announcement ? (
-        <Alert tone="polite" variant="neutral">
-          {announcement}
-        </Alert>
-      ) : null}
+      <RefreshNotice
+        stale={stale}
+        announcement={announcement}
+        error={error}
+        onRetry={onRetry}
+      />
 
-      {error ? (
-        <Alert>
-          <div className="flex flex-col gap-2">
-            <span>{error}</span>
-            {onRetry ? (
-              <button
-                type="button"
-                onClick={onRetry}
-                className="w-fit font-semibold text-[var(--markr-accent)] underline"
-              >
-                Retry
-              </button>
-            ) : null}
-          </div>
-        </Alert>
-      ) : null}
-
-      {tests.length === 0 && error == null ? (
+      {error ? null : tests.length === 0 ? (
         <div className="rounded-[var(--markr-radius)] border border-[var(--markr-border)] bg-[var(--markr-bg-elevated)] px-4 py-8 text-center">
           <p className="m-0 text-[var(--markr-fg-muted)]">No tests imported yet.</p>
           <p className="mt-2 mb-0">

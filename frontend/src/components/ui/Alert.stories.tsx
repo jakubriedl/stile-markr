@@ -37,7 +37,7 @@ export const Neutral: Story = {
   args: {
     tone: "polite",
     variant: "neutral",
-    children: "Unable to refresh. Showing previously loaded data.",
+    children: "Couldn't refresh right now. You're still seeing the last loaded results.",
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);

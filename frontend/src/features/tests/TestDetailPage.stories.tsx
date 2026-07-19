@@ -89,11 +89,9 @@ export const NotFound: Story = {
   },
 };
 
-export const StaleWithAnnouncement: Story = {
+export const StaleWithRetry: Story = {
   args: {
     stale: true,
-    announcement: "Connection restored. Showing updated results.",
-    error: "Unable to load test details.",
     onRetry: fn(),
   },
   play: async ({ canvasElement, args }) => {
@@ -103,7 +101,8 @@ export const StaleWithAnnouncement: Story = {
         name: `Reconnecting. Last refreshed: ${formatLastRefreshed("2026-07-18T10:00:00.000Z")}`,
       }),
     ).toBeInTheDocument();
-    expect(canvas.getByText(/Connection restored/)).toBeInTheDocument();
+    expect(canvas.getByRole("status")).toHaveTextContent(/Couldn't refresh right now/);
+    expect(canvas.queryByRole("alert")).not.toBeInTheDocument();
     await userEvent.click(canvas.getByRole("button", { name: "Retry" }));
     expect(args.onRetry).toHaveBeenCalledOnce();
   },
@@ -114,12 +113,13 @@ export const LoadError: Story = {
     aggregate: null,
     bins: [],
     lastRefreshedAt: null,
-    error: "Unable to load test details.",
+    error: "Couldn't load this test. Check your connection and try again.",
     onRetry: fn(),
   },
   play: async ({ canvasElement, args }) => {
     const canvas = await waitForPage(canvasElement);
-    expect(canvas.getByRole("alert")).toHaveTextContent("Unable to load test details.");
+    expect(canvas.getByRole("alert")).toHaveTextContent(/Couldn't load this test/);
+    expect(canvas.queryByRole("heading", { name: "Score histogram" })).not.toBeInTheDocument();
     await userEvent.click(canvas.getByRole("button", { name: "Retry" }));
     expect(args.onRetry).toHaveBeenCalledOnce();
   },

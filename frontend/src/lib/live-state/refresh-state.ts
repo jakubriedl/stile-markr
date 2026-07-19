@@ -31,7 +31,7 @@ export function reduceRefreshState(state: RefreshState, event: RefreshEvent): Re
         phase: "fresh",
         lastRefreshedAt: event.at,
         announcement: recovering
-          ? "Connection restored. Showing updated results."
+          ? "Back online. Results are up to date."
           : (event.changedAnnouncement ?? null),
       };
     }
@@ -46,8 +46,9 @@ export function reduceRefreshState(state: RefreshState, event: RefreshEvent): Re
       return {
         ...state,
         phase: "stale",
-        announcement:
-          event.staleAnnouncement ?? "Unable to refresh. Showing previously loaded data.",
+        // Visible stale copy lives in RefreshNotice; keep announcement null so we don't
+        // stack a second message when the page already shows the stale alert.
+        announcement: event.staleAnnouncement ?? null,
       };
     default: {
       const _exhaustive: never = event;

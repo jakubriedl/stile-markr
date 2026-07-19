@@ -62,8 +62,6 @@ export const Populated: Story = {
 export const StaleWithRetry: Story = {
   args: {
     stale: true,
-    announcement: "Unable to refresh. Showing previously loaded data.",
-    error: "Unable to load tests.",
     onRetry: fn(),
   },
   play: async ({ canvasElement, args }) => {
@@ -73,7 +71,8 @@ export const StaleWithRetry: Story = {
         name: `Reconnecting. Last refreshed: ${formatLastRefreshed("2026-07-18T10:00:00.000Z")}`,
       }),
     ).toBeInTheDocument();
-    expect(canvas.getByText(/Unable to refresh/)).toBeInTheDocument();
+    expect(canvas.getByRole("status")).toHaveTextContent(/Couldn't refresh right now/);
+    expect(canvas.queryByRole("alert")).not.toBeInTheDocument();
     await userEvent.click(canvas.getByRole("button", { name: "Retry" }));
     expect(args.onRetry).toHaveBeenCalledOnce();
   },
@@ -83,13 +82,14 @@ export const LoadError: Story = {
   args: {
     tests: [],
     lastRefreshedAt: null,
-    error: "Unable to load tests.",
+    error: "Couldn't load the test list. Check your connection and try again.",
     onRetry: fn(),
   },
   play: async ({ canvasElement, args }) => {
     const canvas = await waitForPage(canvasElement);
-    expect(canvas.getByRole("alert")).toHaveTextContent("Unable to load tests.");
+    expect(canvas.getByRole("alert")).toHaveTextContent(/Couldn't load the test list/);
     expect(canvas.queryByText("No tests imported yet.")).not.toBeInTheDocument();
+    expect(canvas.queryByRole("table", { name: "Imported tests" })).not.toBeInTheDocument();
     await userEvent.click(canvas.getByRole("button", { name: "Retry" }));
     expect(args.onRetry).toHaveBeenCalledOnce();
   },

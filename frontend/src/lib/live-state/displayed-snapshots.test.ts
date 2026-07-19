@@ -99,7 +99,7 @@ describe("displayed snapshots", () => {
     });
     refresh = reduceRefreshState(refresh, failed.event);
     expect(refresh.phase).toBe("stale");
-    expect(refresh.announcement).toMatch(/Unable to refresh/);
+    expect(refresh.announcement).toBeNull();
 
     const recovered = syncRefreshFromPoll({
       isError: false,
@@ -109,7 +109,7 @@ describe("displayed snapshots", () => {
       at: "2026-07-18T10:00:02.000Z",
     });
     refresh = reduceRefreshState(refresh, recovered.event);
-    expect(refresh.announcement).toMatch(/Connection restored/);
+    expect(refresh.announcement).toBe("Back online. Results are up to date.");
   });
 
   it("maps successful fingerprint changes to a success announcement event", () => {

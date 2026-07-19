@@ -40,7 +40,7 @@ flowchart LR
 
 ### 4.1 Runtime containers
 
-- **Frontend service:** TanStack Start SSR server on port 3000. It serves pages/assets, performs initial server data loads, and exposes a thin same-origin `/api/*` proxy.
+- **Frontend service:** TanStack Start SSR server on port 3000. It serves SSR document shells/assets and exposes a thin same-origin `/api/*` proxy; list/detail data is fetched after hydration.
 - **Backend service:** Hono HTTP API on port 4567. It owns validation, result behavior, queries, health, and the import worker.
 - **Migration service:** one-shot process using the backend image and shared SQLite volume. Backend startup waits for successful completion.
 - **SQLite volume:** local persistent filesystem volume. It survives ordinary Compose down/up and supports one backend instance.
@@ -128,19 +128,18 @@ Architecture decisions: [`NOTE-ARCH-002`](NOTES.md#note-arch-002), [`NOTE-ARCH-0
 
 ### 7.1 Rendering and routing
 
-- TanStack Start server-renders `/`, `/tests`, and `/tests/:test-id`.
-- Route files own path/parameter validation, loader orchestration, and route-level error/not-found boundaries only.
+- TanStack Start server-renders document shells for `/`, `/tests`, and `/tests/:test-id` (upload UI is static enough to ship in the initial HTML).
+- Route files own path/parameter validation and route-level error/not-found boundaries only; they do not prefetch reporting data in loaders.
 - Page components live in feature directories and accept explicit state/callback props so every state can render in Storybook without a live router or backend.
-- The server serializes TanStack Query state; hydration reuses the same cache rather than performing an immediate duplicate request.
+- List/detail Query data is loaded in the browser after shell hydration. Document SSR does not serialize or dehydrate TanStack Query state.
 - React Server Components and other experimental Start features are not used.
 
 ### 7.2 API boundary
 
-The backend exports `AppType` from a side-effect-free Hono app module. Frontend compilation imports this type only and creates Hono RPC clients with environment-specific base URLs:
+The backend exports `AppType` from a side-effect-free Hono app module. Frontend compilation imports this type only and creates Hono RPC clients for browser same-origin calls:
 
-- SSR loaders use the private backend URL on the Compose network.
 - Browser queries use same-origin `/api`.
-- The frontend proxy strips `/api` and forwards to the backend's unchanged public paths.
+- The frontend proxy strips `/api` and forwards to the backend's unchanged public paths on the Compose network (`BACKEND_URL`).
 
 The proxy:
 
@@ -158,7 +157,7 @@ The browser never needs a public backend environment variable. Backend port 4567
 
 TanStack Query owns server data. Query option factories are colocated by feature and consume the typed Hono client.
 
-- SSR route loaders call `ensureQueryData`.
+- List, aggregate, and histogram queries are fetched in the browser after shell SSR so document TTFB stays independent of reporting-query latency under large datasets or slow SQLite reads. Brief empty/skeleton first paint is accepted.
 - List, aggregate, and histogram queries poll every five seconds after hydration.
 - Query requests send `If-None-Match` when an ETag exists and preserve cached data on 304.
 - Separate aggregate and histogram requests are allowed to be eventually consistent when an import commits between them. The next poll repairs the transient mismatch.

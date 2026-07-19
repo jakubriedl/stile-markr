@@ -8,9 +8,11 @@ import {
 } from "@tanstack/react-router";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useEffect, useState } from "react";
-import { expect, waitFor, within } from "storybook/test";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 
 import { AppShell } from "./AppShell.tsx";
+import { PAGE_HEADING_ELEMENT_ID } from "./page-heading-id.ts";
+import { PageHeading } from "./ui/Heading.tsx";
 
 function createAppShellRouter(initialPath: string) {
   const rootRoute = createRootRoute({
@@ -23,12 +25,22 @@ function createAppShellRouter(initialPath: string) {
   const indexRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "/",
-    component: () => <p>Import content</p>,
+    component: () => (
+      <>
+        <PageHeading>Upload exam results</PageHeading>
+        <p>Import content</p>
+      </>
+    ),
   });
   const testsRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "/tests",
-    component: () => <p>Tests content</p>,
+    component: () => (
+      <>
+        <PageHeading>Tests</PageHeading>
+        <p>Tests content</p>
+      </>
+    ),
   });
 
   return createRouter({
@@ -70,6 +82,11 @@ export const ImportActive: Story = {
       expect(canvas.getByRole("link", { name: "Import" })).toHaveAttribute("aria-current", "page");
     });
     expect(canvas.getByRole("link", { name: "Tests" })).not.toHaveAttribute("aria-current");
+    expect(canvas.getByRole("banner", { name: "Markr" })).toBeInTheDocument();
+    expect(canvas.getByRole("link", { name: "Skip to main content" })).toHaveAttribute(
+      "href",
+      "#page-heading",
+    );
   },
 };
 
@@ -81,5 +98,23 @@ export const TestsActive: Story = {
       expect(canvas.getByRole("link", { name: "Tests" })).toHaveAttribute("aria-current", "page");
     });
     expect(canvas.getByRole("link", { name: "Import" })).not.toHaveAttribute("aria-current");
+  },
+};
+
+export const FocusesHeadingAfterNavigation: Story = {
+  args: { path: "/tests" },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await waitFor(() => {
+      expect(canvas.getByRole("heading", { name: "Tests" })).toBeInTheDocument();
+    });
+    expect(document.activeElement).not.toBe(document.getElementById(PAGE_HEADING_ELEMENT_ID));
+
+    await userEvent.click(canvas.getByRole("link", { name: "Import" }));
+
+    await waitFor(() => {
+      expect(document.activeElement).toBe(document.getElementById(PAGE_HEADING_ELEMENT_ID));
+    });
+    expect(document.activeElement).toHaveTextContent("Upload exam results");
   },
 };

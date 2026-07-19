@@ -30,14 +30,14 @@ export const TypicalFixture: Story = {
     expect(
       canvas.getByRole("heading", { level: 2, name: "Aggregate statistics" }),
     ).toBeInTheDocument();
-    expect(canvas.getByRole("listitem", { name: "Students: 81" })).toBeInTheDocument();
+    expect(canvas.getByRole("img", { name: "Students: 81" })).toBeInTheDocument();
     expect(
-      canvas.getByRole("listitem", {
+      canvas.getByRole("img", {
         name: "Standard deviation: 9.92 percentage points",
       }),
     ).toBeInTheDocument();
-    expect(canvas.getByRole("listitem", { name: "Mean: 50.8 percent" })).toBeInTheDocument();
-    expect(canvas.getByRole("listitem", { name: "Median: 50 percent" })).toBeInTheDocument();
+    expect(canvas.getByRole("img", { name: "Mean: 50.8 percent" })).toBeInTheDocument();
+    expect(canvas.getByRole("img", { name: "Median: 50 percent" })).toBeInTheDocument();
   },
 };
 

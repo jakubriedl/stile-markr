@@ -29,29 +29,38 @@ export function ScoreHistogram({ bins }: ScoreHistogramProps) {
           return (
             <li
               key={`${bin.lower_pct}-${bin.upper_pct}`}
-              aria-label={accessibleName}
               className="flex min-w-0 flex-1 flex-col items-center"
             >
-              <div
-                aria-hidden="true"
-                className="flex h-48 w-full flex-col items-center justify-end border-b border-[var(--markr-border)]"
-              >
-                <span className="mb-1 shrink-0 text-xs font-semibold tabular-nums text-[var(--markr-fg)]">
-                  {bin.count}
-                </span>
-                <div
-                  className="w-full max-w-11 shrink-0 rounded-t-sm bg-[var(--markr-accent)] motion-safe:transition-[height] motion-safe:duration-300"
-                  style={{
-                    height:
-                      bin.count > 0 ? `max(0.2rem, calc(10rem * ${heightPct} / 100))` : 0,
-                  }}
-                />
-              </div>
+              {/*
+                Named role="img" inside the list item (not on <li>): one VO announcement,
+                no “empty group” / duplicate name from aria-label + accessible text.
+              */}
               <span
-                aria-hidden="true"
-                className="mt-2 w-full text-center text-[0.65rem] leading-tight text-[var(--markr-fg-muted)] sm:text-xs"
+                role="img"
+                aria-label={accessibleName}
+                className="flex w-full flex-col items-center"
               >
-                {bin.lower_pct}–{bin.upper_pct}%
+                <div
+                  aria-hidden="true"
+                  className="flex h-48 w-full flex-col items-center justify-end border-b border-[var(--markr-border)]"
+                >
+                  <span className="mb-1 shrink-0 text-xs font-semibold tabular-nums text-[var(--markr-fg)]">
+                    {bin.count}
+                  </span>
+                  <div
+                    className="w-full max-w-11 shrink-0 rounded-t-sm bg-[var(--markr-accent)] motion-safe:transition-[height] motion-safe:duration-300"
+                    style={{
+                      height:
+                        bin.count > 0 ? `max(0.2rem, calc(10rem * ${heightPct} / 100))` : 0,
+                    }}
+                  />
+                </div>
+                <span
+                  aria-hidden="true"
+                  className="mt-2 w-full text-center text-[0.65rem] leading-tight text-[var(--markr-fg-muted)] sm:text-xs"
+                >
+                  {bin.lower_pct}–{bin.upper_pct}%
+                </span>
               </span>
             </li>
           );

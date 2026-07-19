@@ -30,12 +30,8 @@ export const Sparse: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     expect(canvas.getByRole("heading", { name: "Score histogram" })).toBeInTheDocument();
-    expect(
-      canvas.getByRole("listitem", { name: "0 to 10 percent: 2 students" }),
-    ).toBeInTheDocument();
-    expect(
-      canvas.getByRole("listitem", { name: "10 to 20 percent: 5 students" }),
-    ).toBeInTheDocument();
+    expect(canvas.getByRole("img", { name: "0 to 10 percent: 2 students" })).toBeInTheDocument();
+    expect(canvas.getByRole("img", { name: "10 to 20 percent: 5 students" })).toBeInTheDocument();
   },
 };
 
@@ -56,12 +52,8 @@ export const PeakInMiddle: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    expect(
-      canvas.getByRole("listitem", { name: "40 to 50 percent: 28 students" }),
-    ).toBeInTheDocument();
-    expect(
-      canvas.getByRole("listitem", { name: "50 to 60 percent: 28 students" }),
-    ).toBeInTheDocument();
+    expect(canvas.getByRole("img", { name: "40 to 50 percent: 28 students" })).toBeInTheDocument();
+    expect(canvas.getByRole("img", { name: "50 to 60 percent: 28 students" })).toBeInTheDocument();
   },
 };
 

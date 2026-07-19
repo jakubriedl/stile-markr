@@ -53,26 +53,28 @@ export function AggregateStats({ aggregate }: AggregateStatsProps) {
       </h2>
 
       <ul className="m-0 flex list-none flex-wrap gap-x-6 gap-y-1 border-b border-[var(--markr-border)] px-3 py-2.5 sm:px-4">
-        <li aria-label={studentsLabel} className="flex items-baseline gap-2">
-          <span aria-hidden="true" className="text-sm text-[var(--markr-fg-muted)]">
-            Students
-          </span>
-          <span
-            aria-hidden="true"
-            className="text-sm font-semibold tabular-nums sm:text-base"
-          >
-            {aggregate.count}
+        {/*
+          Named role="img" inside the list item (not on <li>): one VO announcement,
+          no “empty group” / duplicate name from aria-label + accessible text.
+        */}
+        <li className="flex">
+          <span role="img" aria-label={studentsLabel} className="flex items-baseline gap-2">
+            <span aria-hidden="true" className="text-sm text-[var(--markr-fg-muted)]">
+              Students
+            </span>
+            <span aria-hidden="true" className="text-sm font-semibold tabular-nums sm:text-base">
+              {aggregate.count}
+            </span>
           </span>
         </li>
-        <li aria-label={stddevLabel} className="flex items-baseline gap-2">
-          <span aria-hidden="true" className="text-sm text-[var(--markr-fg-muted)]">
-            Std. dev.
-          </span>
-          <span
-            aria-hidden="true"
-            className="text-sm font-semibold tabular-nums sm:text-base"
-          >
-            {stdFormatted}
+        <li className="flex">
+          <span role="img" aria-label={stddevLabel} className="flex items-baseline gap-2">
+            <span aria-hidden="true" className="text-sm text-[var(--markr-fg-muted)]">
+              Std. dev.
+            </span>
+            <span aria-hidden="true" className="text-sm font-semibold tabular-nums sm:text-base">
+              {stdFormatted}
+            </span>
           </span>
         </li>
       </ul>
@@ -83,22 +85,24 @@ export function AggregateStats({ aggregate }: AggregateStatsProps) {
           const formatted = formatPercent(value);
           const accessibleName = `${label}: ${formatPercentSpoken(value)}`;
           return (
-            <li
-              key={key}
-              aria-label={accessibleName}
-              className="flex items-center gap-2.5 bg-[var(--markr-bg-elevated)] px-3 py-2.5 sm:gap-3 sm:px-4 sm:py-3"
-            >
-              <PercentDonut
-                value={value}
-                strokeWidth={4}
-                className="size-8 shrink-0 sm:size-10"
-              />
-              <div aria-hidden="true" className="min-w-0">
-                <div className="truncate text-xs text-[var(--markr-fg-muted)] sm:text-sm">
-                  {label}
+            <li key={key} className="flex bg-[var(--markr-bg-elevated)]">
+              <span
+                role="img"
+                aria-label={accessibleName}
+                className="flex flex-1 items-center gap-2.5 px-3 py-2.5 sm:gap-3 sm:px-4 sm:py-3"
+              >
+                <PercentDonut
+                  value={value}
+                  strokeWidth={4}
+                  className="size-8 shrink-0 sm:size-10"
+                />
+                <div aria-hidden="true" className="min-w-0">
+                  <div className="truncate text-xs text-[var(--markr-fg-muted)] sm:text-sm">
+                    {label}
+                  </div>
+                  <div className="text-sm font-semibold tabular-nums sm:text-base">{formatted}</div>
                 </div>
-                <div className="text-sm font-semibold tabular-nums sm:text-base">{formatted}</div>
-              </div>
+              </span>
             </li>
           );
         })}

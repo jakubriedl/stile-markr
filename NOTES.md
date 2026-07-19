@@ -140,9 +140,9 @@ The foundation compatibility gate completed on 2026-07-18 with Bun 1.3.11 select
 
 ### NOTE-ARCH-002 — Frontend service and data boundary
 
-TanStack Start will server-render the initial routes and data, then hydrate in the browser. Server loaders call the Hono backend directly over the internal network. Hydrated browser code calls same-origin `/api/*` routes on the frontend service; the proxy strips `/api`, streams bodies and responses without parsing, forwards only required headers plus request/trace context, and applies origin and timeout protections. The Hono app type is the TypeScript contract through Hono RPC rather than a separate contracts package or generated OpenAPI client.
+TanStack Start server-renders document shells (and static upload UI), then hydrates in the browser. List/detail reporting data is not prefetched in SSR loaders; hydrated browser code calls same-origin `/api/*` on the frontend service. The proxy strips `/api`, streams bodies and responses without parsing, forwards only required headers plus request/trace context, and applies origin and timeout protections against `BACKEND_URL` on the Compose network. The Hono app type is the TypeScript contract through Hono RPC rather than a separate contracts package or generated OpenAPI client.
 
-TanStack Query owns SSR prefetch/dehydration, cache state, five-second polling, retries, and stale state. Aggregate and histogram requests may be eventually consistent across a commit boundary; that transient mismatch is accepted. Each endpoint still emits an ETag and supports `If-None-Match`/304. SSR and browser presentation use fixed `en-AU` formatting. Refresh timestamps are shown in the viewer's local timezone (with a timezone label) and are only rendered after the first client poll settles, so SSR/client timezone mismatch is avoided.
+TanStack Query owns browser cache state, five-second polling, retries, and stale state after shell hydration. Aggregate and histogram requests may be eventually consistent across a commit boundary; that transient mismatch is accepted. Each endpoint still emits an ETag and supports `If-None-Match`/304. Presentation uses fixed `en-AU` formatting. Refresh timestamps are shown in the viewer's local timezone (with a timezone label) and are only rendered after the first client poll settles, so SSR/client timezone mismatch is avoided.
 
 <a id="note-arch-003"></a>
 
@@ -198,11 +198,13 @@ Compose has two modes: default `docker-compose.yml` runs multi-stage production 
 
 <a id="note-arch-010"></a>
 
-### NOTE-ARCH-010 — Accepted debt: SSR Query hydration
+### NOTE-ARCH-010 — Intentional: shell SSR, client Query for list/detail
 
-TanStack Query SSR loaders/`ensureQueryData` dehydration for list/detail are deferred. Composed routes currently hydrate on the client after SSR shells render. Residual risk: brief empty/stale first paint and an immediate client refetch. Revisit before production hardening; tracked against ARCHITECTURE §7.1–7.3.
+Full-content TanStack Query SSR (`ensureQueryData` / dehydration) for list/detail is **not** used. Document SSR ships shells (and static upload HTML); list/aggregate/histogram load in the browser after hydration via same-origin `/api`.
 
-Acceptance evidence (through Wave 4 adversarial fixes): clean-volume Compose smoke passed; Playwright Chromium exercised the sample XML UI upload (Cursor built-in browser cannot attach host filesystem files or fetch host fixture servers); Cursor browser verified list/detail oracles, live count update to 82, stale announcement after backend stop (~8.5s), and recovery announcement after restart. List/detail polling uses `retry: 1` so outages can reach `isError`/stale UI (infinite `retry: true` never settled). Safari/VoiceOver remains a manual checklist in `README.md`.
+**Why:** prioritize document TTFB and resilience when reporting queries are slow (large imports / heavy SQLite reads). The HTML response must not block on backend analytics. Accepted UX tradeoff: brief empty list or detail skeletons before the first client fetch. Documented in ARCHITECTURE §7.1–7.3.
+
+Acceptance evidence (through Wave 4 adversarial fixes): clean-volume Compose smoke passed; Playwright Chromium exercised the sample XML UI upload (Cursor built-in browser cannot attach host filesystem files or fetch host fixture servers); Cursor browser verified list/detail oracles, live count update to 82, stale announcement after backend stop (~8.5s), and recovery announcement after restart. List/detail polling uses `retry: 1` so outages can reach `isError`/stale UI (infinite `retry: true` never settled). Safari/VoiceOver manual pass completed (route focus, skip link, aggregate/histogram naming); checklist remains in `README.md`.
 
 <a id="note-arch-008"></a>
 

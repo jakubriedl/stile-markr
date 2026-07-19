@@ -26,8 +26,8 @@ The task brief is available in [`task/README.md`](task/README.md).
 - [x] Add Docker, CI, and quality automation.
   - Add non-root multi-stage images, migration/backend/frontend Compose ordering, persistent SQLite, optional Collector profile, GitHub Actions, Storybook/coverage artifacts, and Compose/API smoke checks.
 - [ ] Complete full acceptance and submission documentation.
-  - Quality gates, Compose smoke, authorized browser E2E, and Grok 4.5 adversarial PASS are done.
-  - Remaining: manual Safari/VoiceOver checklist (README) and reviewer handoff.
+  - Quality gates, Compose smoke, authorized browser E2E, Grok 4.5 adversarial PASS, and manual Safari/VoiceOver are done.
+  - Remaining: reviewer handoff.
 
 ## Implementation wave checklist
 
@@ -54,8 +54,9 @@ The task brief is available in [`task/README.md`](task/README.md).
 - [x] Run clean-volume Compose smoke.
 - [x] Run authorized destructive browser acceptance (`markr-browser-e2e`).
 - [x] Final adversarial review (Grok 4.5) — PASS on `724cd49^..98222f1` (live announcements, testId session reset, initial-error non-stale).
-  - Accepted debt: SSR Query hydration deferred — [`NOTE-ARCH-010`](NOTES.md#note-arch-010).
-- [ ] Complete manual Safari/VoiceOver checks (checklist in README) and reviewer handoff.
+  - Closed decision (not debt): shell SSR + client Query for list/detail — [`NOTE-ARCH-010`](NOTES.md#note-arch-010).
+- [x] Complete manual Safari/VoiceOver checks (checklist in README).
+- [ ] Reviewer handoff.
 
 <!-- Extend this list with implementation and other todo items as they are discovered. -->
 

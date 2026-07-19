@@ -76,11 +76,9 @@ export const Populated: Story = {
     expect(
       canvas.getByRole("heading", { level: 2, name: "Aggregate statistics" }),
     ).toBeInTheDocument();
-    expect(canvas.getByRole("listitem", { name: "Mean: 50.8 percent" })).toBeInTheDocument();
+    expect(canvas.getByRole("img", { name: "Mean: 50.8 percent" })).toBeInTheDocument();
     expect(canvas.getByRole("heading", { name: "Score histogram" })).toBeInTheDocument();
-    expect(
-      canvas.getByRole("listitem", { name: "40 to 50 percent: 28 students" }),
-    ).toBeInTheDocument();
+    expect(canvas.getByRole("img", { name: "40 to 50 percent: 28 students" })).toBeInTheDocument();
     expect(canvas.getByRole("img", { name: /^Live\. Last refreshed:/ })).toBeInTheDocument();
     expect(canvas.queryByRole("button", { name: /Live|Reconnecting/ })).toBeNull();
   },

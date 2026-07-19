@@ -16,11 +16,20 @@ export default defineConfig({
       exclude: [
         "src/routeTree.gen.ts",
         "src/**/*.stories.tsx",
+        "src/**/*.d.ts",
         "src/lib/api/types.ts",
         "src/components/ui/index.ts",
         "src/styles/**",
+        "src/storybook/**",
+        "src/features/foundation/**",
         // Thin file-route shells; feature pages and API client carry the behavior under test.
         "src/routes/**",
+        // Presentational UI is covered by Storybook play/axe (NOTE-ARCH-007); unit coverage
+        // tracks non-UI logic plus a few behavioral components with dedicated unit tests.
+        "src/components/ui/**",
+        "src/components/AppShell.tsx",
+        "src/features/tests/**/*.tsx",
+        "src/features/upload/**/*.tsx",
       ],
       include: ["src/**/*.{ts,tsx}", "server/**/*.ts"],
       provider: "v8",

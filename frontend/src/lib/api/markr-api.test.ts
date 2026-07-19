@@ -57,7 +57,7 @@ describe("createMarkrApi", () => {
     const api = createMarkrApi({ baseUrl: "http://localhost" });
 
     const imported = await api.importXml("<results />");
-    expect(imported).toEqual({ ok: true, data: { imported: 81 } });
+    expect(imported).toEqual({ ok: true, data: { imported: 81, test_ids: ["9863"] } });
 
     const rejected = await api.importXml("<results />", "application/xml");
     expect(rejected.ok).toBe(false);

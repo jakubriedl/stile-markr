@@ -60,8 +60,11 @@ export function createImportRoutes(dependencies: ImportRouteDependencies) {
         return context.json({ error: parsed.message }, 400);
       }
 
-      const imported = persistImportRecords(dependencies.getWriteDb(), parsed.records);
-      return context.json({ imported }, 200);
+      const { imported, testIds } = persistImportRecords(
+        dependencies.getWriteDb(),
+        parsed.records,
+      );
+      return context.json({ imported, test_ids: testIds }, 200);
     } finally {
       admission.release();
     }

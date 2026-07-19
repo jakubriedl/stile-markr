@@ -67,7 +67,7 @@ describe("createImportRoutes", () => {
     });
 
     expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({ imported: 1 });
+    await expect(response.json()).resolves.toEqual({ imported: 1, test_ids: ["t1"] });
     expect(response.headers.get("content-type")).toContain("application/json");
     deps.close();
   });

@@ -7,7 +7,7 @@ import { getRouter } from "../router.tsx";
 vi.mock("../styles.css?url", () => ({ default: "/styles.css" }));
 
 describe("AppShell", () => {
-  it("renders Upload and Tests nav links with Upload active on home", async () => {
+  it("renders Import and Tests nav links with Import active on home", async () => {
     const router = getRouter();
     router.update({
       history: createMemoryHistory({ initialEntries: ["/"] }),
@@ -15,11 +15,11 @@ describe("AppShell", () => {
     await router.load();
     render(<RouterProvider router={router} />);
 
-    const upload = screen.getByRole("link", { name: "Upload" });
+    const importLink = screen.getByRole("link", { name: "Import" });
     const tests = screen.getByRole("link", { name: "Tests" });
-    expect(upload).toHaveAttribute("href", "/");
+    expect(importLink).toHaveAttribute("href", "/");
     expect(tests).toHaveAttribute("href", "/tests");
-    expect(upload).toHaveAttribute("aria-current", "page");
+    expect(importLink).toHaveAttribute("aria-current", "page");
     expect(tests).not.toHaveAttribute("aria-current");
   });
 
@@ -32,6 +32,6 @@ describe("AppShell", () => {
     render(<RouterProvider router={router} />);
 
     expect(screen.getByRole("link", { name: "Tests" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("link", { name: "Upload" })).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("link", { name: "Import" })).not.toHaveAttribute("aria-current");
   });
 });

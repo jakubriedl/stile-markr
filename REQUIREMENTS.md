@@ -163,7 +163,8 @@ Comments and narrative in supporting files are not requirements unless this docu
   Decision: [`NOTE-REQ-004`](NOTES.md#note-req-004).
 - **IMP-027 (Clarified):** Accepted data remains available until persistent storage is explicitly removed. Automatic expiry and a product deletion feature are not required.
   Decision: [`NOTE-REQ-004`](NOTES.md#note-req-004).
-- **IMP-028 (Supplied, clarified):** A successful import returns `200 OK` with `{"imported":N}`. `N` is the number of unique canonical `(test-id, student-number)` pairs in that request after within-request deduplication, regardless of whether those pairs already existed or changed retained state.
+- **IMP-028 (Supplied, clarified):** A successful import returns `200 OK` with `{"imported":N,"test_ids":[...]}`. `N` is the number of unique canonical `(test-id, student-number)` pairs in that request after within-request deduplication, regardless of whether those pairs already existed or changed retained state. `test_ids` is the sorted list of distinct canonical test IDs present in that request.
+  Decision: [`NOTE-REQ-007`](NOTES.md#note-req-007).
   Source ambiguity: `task/README.md:67-74`. Decision: [`NOTE-REQ-003`](NOTES.md#note-req-003).
 - **IMP-029 (Clarified):** Re-importing the same valid document returns the same unique-pair count while leaving aggregate state unchanged. A no-op re-import must not create duplicate students.
   Consequence of IMP-020, IMP-021, and IMP-028.
@@ -289,12 +290,12 @@ Comments and narrative in supporting files are not requirements unless this docu
   Source: `task/README.md:130`. Decision: [`NOTE-REQ-007`](NOTES.md#note-req-007).
 - **UPLOAD-005 (Supplied):** The upload must send the selected bytes to `POST /import` with base `Content-Type: text/xml+markr`.
   Source: `task/README.md:135`.
-- **UPLOAD-006 (Supplied, clarified):** On success, the page must remain on `/` and make a polite status announcement reporting the backend's unique-pair `imported` count.
+- **UPLOAD-006 (Supplied, clarified):** On success, the page must remain on `/` and make a polite status announcement reporting the backend's unique-pair `imported` count. It also lists each distinct imported `test_id` as a link to `/tests/:test-id`.
   Source: `task/README.md:131`. Decision: [`NOTE-REQ-007`](NOTES.md#note-req-007).
 - **UPLOAD-007 (Supplied, clarified):** Empty selection, wrong file type, oversize file, network failure, and backend rejection must use an attention-grabbing accessible alert that explains the failure. This alert must remain a distinct announcement channel from success.
   Source: `task/README.md:130-132`. Decision: [`NOTE-REQ-007`](NOTES.md#note-req-007).
-- **UPLOAD-008 (Supplied):** The page must contain a link to `/tests`.
-  Source: `task/README.md:133`.
+- **UPLOAD-008 (Clarified):** The upload route must expose a link to `/tests`. The AppShell primary nav `Tests` item satisfies this; a duplicate in-page link is not required.
+  Source: `task/README.md:133`. Decision: [`NOTE-REQ-007`](NOTES.md#note-req-007).
 
 ## 12. Tests list page
 
@@ -361,7 +362,7 @@ These facts are acceptance oracles for [`task/sample_results.xml`](task/sample_r
 
 - **FIX-001:** The file is well-formed UTF-8 XML with root `mcq-test-results`.
 - **FIX-002:** It contains 100 raw result elements, 2,000 answer elements, one test ID (`9863`), 81 unique canonical student-test pairs, and 19 duplicate pairs.
-- **FIX-003:** Because `imported` counts unique pairs, importing the complete fixture returns `{"imported":81}`.
+- **FIX-003:** Because `imported` counts unique pairs, importing the complete fixture returns `{"imported":81,"test_ids":["9863"]}`.
 - **FIX-004:** All duplicate pairs have conflicting names. Names must not affect identity.
 - **FIX-005:** Seven later duplicate scans have lower scores, nine have higher scores, and three tie. Maximum score, not latest score, determines retained `obtained`.
 - **FIX-006:** Student numbers `002299` and `002349` are valid and normalize numerically to `2299` and `2349`.

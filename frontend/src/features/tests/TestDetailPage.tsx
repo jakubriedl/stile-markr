@@ -1,19 +1,13 @@
 import { Alert } from "../../components/ui/Alert.tsx";
-import { PageHeading, SectionHeading } from "../../components/ui/Heading.tsx";
+import { PageHeading } from "../../components/ui/Heading.tsx";
 import { Link } from "../../components/ui/Link.tsx";
+import { FullscreenButton } from "../../components/ui/FullscreenButton.tsx";
 import { RefreshStatusTag } from "../../components/ui/RefreshStatusTag.tsx";
+import { AggregateStats, type AggregateView } from "./AggregateStats.tsx";
 import { ScoreHistogram } from "./ScoreHistogram.tsx";
+import { AggregateStatsSkeleton, ScoreHistogramSkeleton } from "./TestDetailSkeletons.tsx";
 
-export type AggregateView = {
-  mean: number;
-  stddev: number;
-  min: number;
-  max: number;
-  p25: number;
-  p50: number;
-  p75: number;
-  count: number;
-};
+export type { AggregateView };
 
 export type HistogramBinView = {
   lower_pct: number;
@@ -30,13 +24,10 @@ export type TestDetailPageProps = {
   announcement?: string | null;
   notFound?: boolean;
   error?: string | null;
+  loading?: boolean;
   onRetry?: () => void;
   testsHref?: string;
 };
-
-function formatPercent(value: number): string {
-  return `${value.toFixed(2)}%`;
-}
 
 export function TestDetailPage({
   testId,
@@ -47,6 +38,7 @@ export function TestDetailPage({
   announcement = null,
   notFound = false,
   error = null,
+  loading = false,
   onRetry,
   testsHref = "/tests",
 }: TestDetailPageProps) {
@@ -61,14 +53,17 @@ export function TestDetailPage({
   }
 
   return (
-    <main className="flex flex-col gap-6">
+    <main className="flex flex-col gap-6" aria-busy={loading || undefined}>
       <header className="flex items-start justify-between gap-4">
         <PageHeading>Test {testId}</PageHeading>
-        <RefreshStatusTag
-          lastRefreshedAt={lastRefreshedAt}
-          stale={stale}
-          settled={lastRefreshedAt != null || stale || error != null}
-        />
+        <div className="flex items-center gap-1">
+          <RefreshStatusTag
+            lastRefreshedAt={lastRefreshedAt}
+            stale={stale}
+            settled={lastRefreshedAt != null || stale || error != null}
+          />
+          <FullscreenButton />
+        </div>
       </header>
 
       {announcement ? (
@@ -94,39 +89,17 @@ export function TestDetailPage({
         </Alert>
       ) : null}
 
-      {aggregate ? (
-        <section aria-labelledby="aggregate-heading" className="flex flex-col gap-3">
-          <SectionHeading id="aggregate-heading">Aggregate statistics</SectionHeading>
-          <dl className="m-0 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {(
-              [
-                ["Students", String(aggregate.count), ""],
-                ["Mean", formatPercent(aggregate.mean), "percent"],
-                ["Std. dev.", formatPercent(aggregate.stddev), "percentage points"],
-                ["Min", formatPercent(aggregate.min), "percent"],
-                ["Max", formatPercent(aggregate.max), "percent"],
-                ["25th percentile", formatPercent(aggregate.p25), "percent"],
-                ["Median", formatPercent(aggregate.p50), "percent"],
-                ["75th percentile", formatPercent(aggregate.p75), "percent"],
-              ] as const
-            ).map(([label, value, unit]) => (
-              <div
-                key={label}
-                className="rounded-[var(--markr-radius)] bg-[var(--markr-bg-elevated)] p-3"
-              >
-                <dt className="m-0 text-sm text-[var(--markr-fg-muted)]">{label}</dt>
-                <dd className="m-0 text-lg font-semibold">
-                  <span aria-label={unit ? `${label} ${value} ${unit}` : `${label} ${value}`}>
-                    {value}
-                  </span>
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </section>
-      ) : null}
-
-      <ScoreHistogram bins={bins} />
+      {loading ? (
+        <>
+          <AggregateStatsSkeleton />
+          <ScoreHistogramSkeleton />
+        </>
+      ) : (
+        <>
+          {aggregate ? <AggregateStats aggregate={aggregate} /> : null}
+          <ScoreHistogram bins={bins} />
+        </>
+      )}
     </main>
   );
 }

@@ -32,6 +32,7 @@ export type HistogramResponse = {
 
 export type ImportSuccessResponse = {
   imported: number;
+  test_ids: string[];
 };
 
 export type ApiErrorResponse = {

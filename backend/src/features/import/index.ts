@@ -1,6 +1,11 @@
 export { IMPORT_MAX_BYTES } from "./limits.ts";
 export { parseImportBuffer, parseImportDocument } from "./parse-document.ts";
-export { countUniquePairs, persistImportRecords, type ImportWriteDatabase } from "./persist.ts";
+export {
+  countUniquePairs,
+  persistImportRecords,
+  type ImportWriteDatabase,
+  type PersistImportResult,
+} from "./persist.ts";
 export {
   IMPORT_ACTIVE_LIMIT,
   IMPORT_QUEUED_LIMIT,

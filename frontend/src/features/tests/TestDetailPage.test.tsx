@@ -38,6 +38,37 @@ describe("TestDetailPage", () => {
     expect(screen.getByRole("link", { name: "Back to tests" })).toHaveAttribute("href", "/tests");
   });
 
+  it("renders loading skeletons without live statistics", () => {
+    render(
+      <TestDetailPage
+        testId="9863"
+        aggregate={null}
+        bins={[]}
+        lastRefreshedAt={null}
+        loading
+      />,
+    );
+
+    expect(screen.getByRole("main")).toHaveAttribute("aria-busy", "true");
+    expect(screen.queryByLabelText(/Mean/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Score histogram" })).not.toBeInTheDocument();
+  });
+
+  it("formats percentages with up to two decimal places", () => {
+    render(
+      <TestDetailPage
+        testId="9863"
+        aggregate={{ ...aggregate, mean: 51.4, stddev: 11.234, min: 30.0 }}
+        bins={bins}
+        lastRefreshedAt={null}
+      />,
+    );
+
+    expect(screen.getByLabelText("Mean 51.4% percent")).toBeInTheDocument();
+    expect(screen.getByLabelText("Std. dev. 11.23% percentage points")).toBeInTheDocument();
+    expect(screen.getByLabelText("Min 30% percent")).toBeInTheDocument();
+  });
+
   it("renders aggregates, histogram, announcements, and retry", async () => {
     const user = userEvent.setup();
     const onRetry = vi.fn();
@@ -61,9 +92,9 @@ describe("TestDetailPage", () => {
       }),
     ).toBeInTheDocument();
     expect(screen.getByText(/Connection restored/)).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Aggregate statistics" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Aggregate statistics" })).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Score histogram" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Mean 50.00% percent")).toBeInTheDocument();
+    expect(screen.getByLabelText("Mean 50% percent")).toBeInTheDocument();
     expect(screen.getByLabelText("40 to 50 percent: 28 students")).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Back to tests" })).not.toBeInTheDocument();
 

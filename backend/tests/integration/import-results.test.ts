@@ -78,7 +78,10 @@ describe("import to results integration", () => {
       body: xml,
     });
     expect(importResponse.status).toBe(200);
-    await expect(importResponse.json()).resolves.toEqual({ imported: 81 });
+    await expect(importResponse.json()).resolves.toEqual({
+      imported: 81,
+      test_ids: ["9863"],
+    });
 
     const testsResponse = await fetch(`http://127.0.0.1:${port}/tests`);
     expect(testsResponse.status).toBe(200);

@@ -41,3 +41,12 @@ export const Populated: Story = {};
 export const NotFound: Story = {
   args: { notFound: true, aggregate: null, bins: [] },
 };
+
+export const Loading: Story = {
+  args: {
+    loading: true,
+    aggregate: null,
+    bins: [],
+    lastRefreshedAt: null,
+  },
+};

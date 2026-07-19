@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
+import { PAGE_CONTENT_ELEMENT_ID } from "./ui/FullscreenButton.tsx";
+
 const navInactive =
   "rounded-[var(--markr-radius)] px-3 py-1.5 text-sm font-semibold text-[var(--markr-fg-muted)] no-underline outline-none transition-colors hover:bg-[var(--markr-bg-elevated)] hover:text-[var(--markr-fg)] focus-visible:ring-2 focus-visible:ring-[var(--markr-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--markr-bg)]";
 
@@ -26,7 +28,7 @@ export function AppShell({ children }: AppShellProps) {
               inactiveProps={{ className: navInactive }}
               activeProps={{ className: navActive, "aria-current": "page" }}
             >
-              Upload
+              Import
             </Link>
             <Link
               to="/tests"
@@ -38,7 +40,12 @@ export function AppShell({ children }: AppShellProps) {
           </nav>
         </div>
       </header>
-      <div className="mx-auto max-w-4xl px-4 py-8">{children}</div>
+      <div
+        id={PAGE_CONTENT_ELEMENT_ID}
+        className="mx-auto max-w-4xl bg-[var(--markr-bg)] px-4 py-8 [:fullscreen]:max-w-none [:fullscreen]:min-h-full [:fullscreen]:w-screen [:fullscreen]:overflow-auto"
+      >
+        {children}
+      </div>
     </div>
   );
 }

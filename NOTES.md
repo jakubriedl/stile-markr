@@ -94,6 +94,8 @@ Full metrics and tracing are out of scope, but the backend should expose `GET /h
 ### NOTE-REQ-007 — Frontend behavior and accessibility
 
 - The upload and list headings should be exactly `Upload exam results` and `Tests`.
+- UPLOAD-008's link to `/tests` is satisfied by the AppShell primary nav `Tests` item present on every page, including `/`. A second in-page "View tests" control is omitted as duplicate chrome.
+- Successful imports return additive `test_ids` alongside `imported` so the upload success status can link to each affected test detail page without a follow-up list fetch.
 - Upload accepts one XML file recognized by a case-insensitive `.xml` extension or an XML MIME type. Client and server enforce the 50 MiB cap, while backend content validation remains authoritative.
 - Missing, wrong-type, oversized, backend, and network upload failures use the accessible alert channel.
 - Initial list/detail load failures show an accessible error state with retry and relevant navigation.

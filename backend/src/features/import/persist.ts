@@ -12,17 +12,26 @@ export type ImportWriteDatabase = {
   };
 };
 
+export type PersistImportResult = {
+  imported: number;
+  /** Distinct canonical test IDs present in this request after within-request deduplication. */
+  testIds: string[];
+};
+
 /**
  * Persist accepted import records inside a single immediate transaction.
- * Returns the unique-pair count for this request (IMP-028).
+ * Returns the unique-pair count for this request (IMP-028) and distinct test IDs.
  */
 export function persistImportRecords(
   db: ImportWriteDatabase,
   records: readonly RetainedResult[],
   nowMs = Date.now(),
-): number {
+): PersistImportResult {
   const folded = foldRetainedResults(records);
   const uniqueCount = folded.size;
+  const testIds = [...new Set([...folded.values()].map((record) => record.testId))].sort((left, right) =>
+    left.localeCompare(right),
+  );
 
   db.exec("BEGIN IMMEDIATE");
   try {
@@ -93,7 +102,7 @@ export function persistImportRecords(
 
     db.exec("DELETE FROM import_request_keys");
     db.exec("COMMIT");
-    return uniqueCount;
+    return { imported: uniqueCount, testIds };
   } catch (error) {
     db.exec("ROLLBACK");
     throw error;

@@ -60,14 +60,14 @@ describe("persistImportRecords", () => {
       100,
     );
 
-    expect(firstCount).toBe(2);
+    expect(firstCount).toEqual({ imported: 2, testIds: ["exam"] });
 
     const secondCount = persistImportRecords(
       db,
       [result({ studentNumber: 1, obtained: 3, available: 12, firstName: "C", scannedOnMs: 5 })],
       200,
     );
-    expect(secondCount).toBe(1);
+    expect(secondCount).toEqual({ imported: 1, testIds: ["exam"] });
 
     const rows = sqlite.prepare("SELECT * FROM results ORDER BY student_number").all() as Array<{
       student_number: number;

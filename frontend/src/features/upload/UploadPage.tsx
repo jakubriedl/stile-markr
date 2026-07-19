@@ -1,14 +1,21 @@
-import { FileTrigger } from "react-aria-components";
+import { DropZone, FileTrigger, Text } from "react-aria-components";
 import { useState, type FormEvent } from "react";
 
 import { Alert } from "../../components/ui/Alert.tsx";
 import { Button } from "../../components/ui/Button.tsx";
 import { PageHeading } from "../../components/ui/Heading.tsx";
+import { Link } from "../../components/ui/Link.tsx";
+import type { ImportSuccessResponse } from "../../lib/api/types.ts";
 
 const MAX_UPLOAD_BYTES = 52_428_800;
 
 export type UploadPageProps = {
-  onUpload: (file: File) => Promise<{ imported: number }>;
+  onUpload: (file: File) => Promise<ImportSuccessResponse>;
+};
+
+type UploadSuccess = {
+  imported: number;
+  testIds: string[];
 };
 
 function isXmlFile(file: File): boolean {
@@ -29,17 +36,34 @@ function validateSelection(next: File | null): string | null {
   return null;
 }
 
+function UploadGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-10 text-[var(--markr-accent)]" fill="none" aria-hidden="true">
+      <path
+        d="M12 16V4m0 0 4 4m-4-4-4 4M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function UploadPage({ onUpload }: UploadPageProps) {
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [success, setSuccess] = useState<UploadSuccess | null>(null);
   const [pending, setPending] = useState(false);
 
-  const onSelect = (fileList: FileList | null) => {
-    const next = fileList?.[0] ?? null;
+  const applyFile = (next: File | null) => {
     setFile(next);
     setSuccess(null);
     setError(validateSelection(next));
+  };
+
+  const onSelect = (fileList: FileList | null) => {
+    applyFile(fileList?.[0] ?? null);
   };
 
   const onSubmit = async (event: FormEvent) => {
@@ -56,7 +80,10 @@ export function UploadPage({ onUpload }: UploadPageProps) {
     setSuccess(null);
     try {
       const result = await onUpload(file);
-      setSuccess(`Imported ${result.imported} unique results.`);
+      setSuccess({
+        imported: result.imported,
+        testIds: result.test_ids,
+      });
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Upload failed.");
     } finally {
@@ -75,34 +102,90 @@ export function UploadPage({ onUpload }: UploadPageProps) {
         </p>
       </header>
 
-      <form className="flex flex-col gap-4" onSubmit={onSubmit}>
+      <form
+        className="flex flex-col gap-4 rounded-[var(--markr-radius)] border border-[var(--markr-border)] bg-[var(--markr-bg-elevated)] p-4 sm:p-5"
+        onSubmit={onSubmit}
+      >
         <div className="flex flex-col gap-2">
-          <span id="results-file-label" className="text-sm font-semibold">
-            Results XML file
-          </span>
-          <div className="flex flex-wrap items-center gap-3">
+          <DropZone
+            isDisabled={pending}
+            getDropOperation={() => "copy"}
+            onDrop={async (event) => {
+              const item = event.items.find((entry) => entry.kind === "file");
+              if (item?.kind !== "file") {
+                applyFile(null);
+                return;
+              }
+              applyFile(await item.getFile());
+            }}
+            className={({ isDropTarget, isFocusVisible, isDisabled }) =>
+              [
+                "flex flex-col items-center justify-center gap-3 rounded-[var(--markr-radius)] border border-dashed px-4 py-8 text-center outline-none transition-colors",
+                isDisabled
+                  ? "cursor-not-allowed border-[var(--markr-border)] opacity-60"
+                  : "border-[var(--markr-border)] hover:border-[var(--markr-accent)] hover:bg-[var(--markr-bg)]",
+                isDropTarget
+                  ? "border-[var(--markr-accent)] bg-[var(--markr-bg)] ring-2 ring-[var(--markr-focus)]"
+                  : "",
+                isFocusVisible
+                  ? "ring-2 ring-[var(--markr-focus)] ring-offset-2 ring-offset-[var(--markr-bg-elevated)]"
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" ")
+            }
+          >
+            <UploadGlyph />
+            <Text slot="label" className="m-0 text-sm text-[var(--markr-fg)]">
+              Drop a results XML file here, or choose one to upload
+            </Text>
             <FileTrigger
               acceptedFileTypes={[".xml", "text/xml", "application/xml"]}
               onSelect={onSelect}
             >
-              <Button type="button" variant="secondary">
+              <Button type="button" variant="secondary" isDisabled={pending}>
                 Choose file
               </Button>
             </FileTrigger>
-            <span className="text-sm text-[var(--markr-fg-muted)]" data-testid="selected-file-name">
+            <p
+              className="m-0 max-w-full truncate text-sm text-[var(--markr-fg-muted)]"
+              data-testid="selected-file-name"
+            >
               {file ? file.name : "No file selected"}
-            </span>
-          </div>
+            </p>
+          </DropZone>
         </div>
+
         <Button type="submit" isDisabled={!canSubmit}>
-          Upload
+          {pending ? "Uploading…" : "Upload"}
         </Button>
       </form>
 
       {error ? <Alert>{error}</Alert> : null}
       {success ? (
         <Alert tone="polite" variant="success">
-          {success}
+          <div className="flex flex-col gap-2">
+            <p className="m-0">Imported {success.imported} unique results.</p>
+            {success.testIds.length > 0 ? (
+              <div className="flex flex-col gap-1">
+                <p className="m-0 font-semibold">
+                  {success.testIds.length === 1 ? "Test in this import:" : "Tests in this import:"}
+                </p>
+                <ul className="m-0 flex list-none flex-wrap gap-x-3 gap-y-1 p-0">
+                  {success.testIds.map((testId) => (
+                    <li key={testId}>
+                      <Link
+                        href={`/tests/${encodeURIComponent(testId)}`}
+                        className="text-current underline underline-offset-2"
+                      >
+                        {testId}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </div>
         </Alert>
       ) : null}
     </main>

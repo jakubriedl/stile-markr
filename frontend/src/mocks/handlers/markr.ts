@@ -67,7 +67,7 @@ export function createMarkrHandlers(baseUrl = "http://localhost") {
       if (!contentType.startsWith("text/xml+markr")) {
         return HttpResponse.json({ error: "Unsupported media type" }, { status: 415 });
       }
-      return HttpResponse.json({ imported: 81 });
+      return HttpResponse.json({ imported: 81, test_ids: ["9863"] });
     }),
   ];
 }

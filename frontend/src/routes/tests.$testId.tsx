@@ -75,6 +75,11 @@ function TestDetailLive({ testId }: { testId: string }) {
 
   const notFound = aggregateQuery.data === null || histogramQuery.data === null;
   const isError = aggregateQuery.isError || histogramQuery.isError;
+  // Keep the skeleton until both payloads settle so the layout does not jump mid-load.
+  const loading =
+    !notFound &&
+    !isError &&
+    (aggregateQuery.data === undefined || histogramQuery.data === undefined);
 
   useEffect(() => {
     const fingerprint =
@@ -108,6 +113,7 @@ function TestDetailLive({ testId }: { testId: string }) {
       stale={session.refresh.phase === "stale"}
       announcement={session.refresh.announcement}
       notFound={notFound}
+      loading={loading}
       error={isError && aggregateQuery.data == null ? "Unable to load test details." : null}
       onRetry={() => {
         void aggregateQuery.refetch();

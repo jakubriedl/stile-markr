@@ -149,12 +149,8 @@ describe("parseImportDocument", () => {
       async *[Symbol.asyncIterator]() {
         const prefix = encoder.encode("<mcq-test-results><!--");
         yield prefix;
-        const chunk = encoder.encode("a".repeat(1024 * 1024));
-        let sent = prefix.byteLength;
-        while (sent <= IMPORT_MAX_BYTES) {
-          yield chunk;
-          sent += chunk.byteLength;
-        }
+        // Cross the limit on the next chunk so coverage runs do not SAX-parse ~50 MiB.
+        yield new Uint8Array(IMPORT_MAX_BYTES - prefix.byteLength + 1);
       },
     };
 

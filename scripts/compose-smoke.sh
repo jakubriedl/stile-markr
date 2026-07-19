@@ -22,8 +22,9 @@ backend_health="$(curl -fsS "$BACKEND_URL/health")"
 test "$backend_health" = '{"status":"ok"}'
 
 echo "Checking frontend SSR shell..."
-# Avoid storing binary/null-padded responses in bash variables (curl warning).
-curl -fsS "$FRONTEND_URL/" | tr -d '\0' | grep -q "Upload exam results"
+# Strip NULs before bash stores the body (avoids "ignored null byte" + pipefail/grep -q races).
+frontend_html="$(curl -fsS "$FRONTEND_URL/" | tr -d '\0')"
+printf '%s' "$frontend_html" | grep -q "Upload exam results"
 
 echo "Checking same-origin API proxy..."
 curl -fsS "$FRONTEND_URL/api/tests" >/dev/null

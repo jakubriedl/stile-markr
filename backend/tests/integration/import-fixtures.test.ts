@@ -114,11 +114,6 @@ const successCases: SuccessCase[] = [
     status: 200,
     body: { imported: 2, test_ids: ["fold_1"] },
   },
-  {
-    fixture: "huge-text-field.xml",
-    status: 200,
-    body: { imported: 1, test_ids: ["huge_1"] },
-  },
 ];
 
 const errorCases: ErrorCase[] = [
@@ -241,5 +236,27 @@ describe("import fixture suite", () => {
     expect(aggregate.min).toBe(50);
     expect(aggregate.max).toBe(80);
     expect(aggregate.mean).toBe(65);
+  });
+
+  it("accepts a large text field under the 50 MiB byte budget", async () => {
+    const { port } = await startBackend();
+    const hugeName = "A".repeat(100_000);
+    const body = `<?xml version="1.0" encoding="UTF-8"?>
+<mcq-test-results>
+  <mcq-test-result>
+    <first-name>${hugeName}</first-name>
+    <student-number>1</student-number>
+    <test-id>huge_1</test-id>
+    <summary-marks available="10" obtained="5" />
+  </mcq-test-result>
+</mcq-test-results>
+`;
+    const response = await fetch(`http://127.0.0.1:${port}/import`, {
+      method: "POST",
+      headers: { "Content-Type": "text/xml+markr" },
+      body,
+    });
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ imported: 1, test_ids: ["huge_1"] });
   });
 });

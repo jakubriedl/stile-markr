@@ -21,7 +21,8 @@ Error responses use `{ error, path?, fix? }`. Malformed XML keeps `error: "Inval
 | `not-xml.txt` | Garbage body with markr media type | `400` `Invalid XML format` + guidance |
 | `not-xml.xml` | XML extension with garbage | `400` `Invalid XML format` + guidance |
 | `xml-but-wrong-content-type.xml` | Valid XML bytes | `415` when sent with e.g. `application/xml` |
-| `huge-text-field.xml` | ~100 KiB first-name under 50 MiB budget | `200` `{ imported: 1, test_ids: ["huge_1"] }` |
+
+Large (~100 KiB) first-name payloads are generated in the integration test at runtime rather than committed as a fixture file.
 
 ## Stats edge fixture (`valid-stats-edge-cases.xml`)
 

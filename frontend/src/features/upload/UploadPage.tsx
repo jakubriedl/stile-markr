@@ -6,6 +6,8 @@ import { Button } from "../../components/ui/Button.tsx";
 import { PageHeading } from "../../components/ui/Heading.tsx";
 import { Link } from "../../components/ui/Link.tsx";
 import type { ImportSuccessResponse } from "../../lib/api/types.ts";
+import type { UploadErrorParts } from "./format-upload-error.ts";
+import { UploadErrorAlert } from "./UploadErrorAlert.tsx";
 
 const MAX_UPLOAD_BYTES = 52_428_800;
 
@@ -18,20 +20,42 @@ type UploadSuccess = {
   testIds: string[];
 };
 
+export class UploadRequestError extends Error {
+  readonly parts: UploadErrorParts;
+
+  constructor(parts: UploadErrorParts) {
+    super(parts.summary);
+    this.name = "UploadRequestError";
+    this.parts = parts;
+  }
+}
+
 function isXmlFile(file: File): boolean {
   const name = file.name.toLowerCase();
   return name.endsWith(".xml") || file.type.includes("xml");
 }
 
-function validateSelection(next: File | null): string | null {
+function validateSelection(next: File | null): UploadErrorParts | null {
   if (next == null) {
-    return "Choose an XML file before uploading.";
+    return {
+      summary: "No file selected yet.",
+      path: "File picker",
+      fix: "Choose a Markr results XML file, then click Upload.",
+    };
   }
   if (!isXmlFile(next)) {
-    return "Selected file must be XML.";
+    return {
+      summary: "That file does not look like XML.",
+      path: next.name,
+      fix: "Choose a file that ends in .xml (or has an XML type). Spreadsheets and PDFs cannot be imported here.",
+    };
   }
   if (next.size > MAX_UPLOAD_BYTES) {
-    return "Selected file must not exceed 50 MiB.";
+    return {
+      summary: "This file is larger than Markr allows.",
+      path: `${next.name} · Upload size limit (50 MiB)`,
+      fix: "Upload a results file of 50 MiB or smaller.",
+    };
   }
   return null;
 }
@@ -52,7 +76,7 @@ function UploadGlyph() {
 
 export function UploadPage({ onUpload }: UploadPageProps) {
   const [file, setFile] = useState<File | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<UploadErrorParts | null>(null);
   const [success, setSuccess] = useState<UploadSuccess | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -70,7 +94,13 @@ export function UploadPage({ onUpload }: UploadPageProps) {
     event.preventDefault();
     const validationError = validateSelection(file);
     if (validationError || file == null) {
-      setError(validationError ?? "Choose an XML file before uploading.");
+      setError(
+        validationError ?? {
+          summary: "No file selected yet.",
+          path: "File picker",
+          fix: "Choose a Markr results XML file, then click Upload.",
+        },
+      );
       setSuccess(null);
       return;
     }
@@ -85,7 +115,19 @@ export function UploadPage({ onUpload }: UploadPageProps) {
         testIds: result.test_ids,
       });
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Upload failed.");
+      if (cause instanceof UploadRequestError) {
+        setError(cause.parts);
+      } else if (cause instanceof Error) {
+        setError({
+          summary: cause.message || "Upload failed.",
+          fix: "Check your connection and try again.",
+        });
+      } else {
+        setError({
+          summary: "Upload failed.",
+          fix: "Check your connection and try again.",
+        });
+      }
     } finally {
       setPending(false);
     }
@@ -167,7 +209,7 @@ export function UploadPage({ onUpload }: UploadPageProps) {
         </Button>
       </form>
 
-      {error ? <Alert>{error}</Alert> : null}
+      {error ? <UploadErrorAlert error={error} /> : null}
       {success ? (
         <Alert tone="polite" variant="success">
           <div className="flex flex-col gap-2">

@@ -73,12 +73,14 @@ describe("parseImportDocument", () => {
     }
   });
 
-  it("rejects malformed XML with the exact contract message", async () => {
+  it("rejects malformed XML with the exact contract message and location guidance", async () => {
     const outcome = await parseImportBuffer(xml("<mcq-test-results><oops></mcq-test-results>"));
-    expect(outcome).toEqual({
+    expect(outcome).toMatchObject({
       ok: false,
       code: "invalid_xml",
       message: INVALID_XML_MESSAGE,
+      path: expect.stringMatching(/line/i),
+      fix: expect.stringMatching(/closing tag/i),
     });
   });
 

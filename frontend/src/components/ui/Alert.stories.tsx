@@ -7,7 +7,7 @@ const meta = {
   title: "Components/Alert",
   component: Alert,
   args: {
-    children: "Choose an XML file before uploading.",
+    children: "No file selected yet.",
   },
 } satisfies Meta<typeof Alert>;
 

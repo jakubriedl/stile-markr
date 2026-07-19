@@ -93,7 +93,9 @@ type ErrorCase = {
   fixture: string;
   contentType?: string;
   status: 400 | 415;
-  error?: string;
+  error?: string | RegExp;
+  path?: string | RegExp;
+  fix?: string | RegExp;
 };
 
 const successCases: SuccessCase[] = [
@@ -120,23 +122,69 @@ const successCases: SuccessCase[] = [
 ];
 
 const errorCases: ErrorCase[] = [
-  { fixture: "broken-unclosed-tag.xml", status: 400, error: INVALID_XML_MESSAGE },
-  { fixture: "broken-wrong-root.xml", status: 400 },
-  { fixture: "broken-missing-required.xml", status: 400 },
-  { fixture: "broken-available-zero.xml", status: 400 },
-  { fixture: "broken-negative-marks.xml", status: 400 },
+  {
+    fixture: "broken-unclosed-tag.xml",
+    status: 400,
+    error: INVALID_XML_MESSAGE,
+    path: /line/i,
+    fix: /closing tag/i,
+  },
+  {
+    fixture: "broken-wrong-root.xml",
+    status: 400,
+    error: /root element/i,
+    path: /document root/i,
+    fix: /mcq-test-results/i,
+  },
+  {
+    fixture: "broken-missing-required.xml",
+    status: 400,
+    error: /missing required/i,
+    path: /result #1/i,
+    fix: /student-number/i,
+  },
+  {
+    fixture: "broken-available-zero.xml",
+    status: 400,
+    error: /score values/i,
+    path: /summary-marks/i,
+    fix: /available/i,
+  },
+  {
+    fixture: "broken-negative-marks.xml",
+    status: 400,
+    error: /score values/i,
+    path: /summary-marks/i,
+    fix: /obtained/i,
+  },
   {
     fixture: "empty-mcq-results.xml",
     status: 400,
-    error: "Document must contain at least one mcq-test-result",
+    error: /no student results/i,
+    path: /mcq-test-results/i,
+    fix: /mcq-test-result/i,
   },
-  { fixture: "not-xml.txt", status: 400, error: INVALID_XML_MESSAGE },
-  { fixture: "not-xml.xml", status: 400, error: INVALID_XML_MESSAGE },
+  {
+    fixture: "not-xml.txt",
+    status: 400,
+    error: INVALID_XML_MESSAGE,
+    path: /line/i,
+    fix: /closing tag|UTF-8/i,
+  },
+  {
+    fixture: "not-xml.xml",
+    status: 400,
+    error: INVALID_XML_MESSAGE,
+    path: /line/i,
+    fix: /closing tag|UTF-8/i,
+  },
   {
     fixture: "xml-but-wrong-content-type.xml",
     contentType: "application/xml",
     status: 415,
-    error: "Unsupported media type",
+    error: /Markr XML format/i,
+    path: /Content-Type/i,
+    fix: /text\/xml\+markr/i,
   },
 ];
 
@@ -153,14 +201,24 @@ describe("import fixture suite", () => {
 
   it.each(errorCases)(
     "rejects $fixture with $status",
-    async ({ fixture, contentType, status, error }) => {
+    async ({ fixture, contentType, status, error, path, fix }) => {
       const { port } = await startBackend();
       const response = await postImport(port, fixture, contentType);
       expect(response.status).toBe(status);
-      const json = (await response.json()) as { error: string };
+      const json = (await response.json()) as { error: string; path?: string; fix?: string };
       expect(json).toHaveProperty("error");
       if (error != null) {
-        expect(json.error).toBe(error);
+        if (typeof error === "string") {
+          expect(json.error).toBe(error);
+        } else {
+          expect(json.error).toMatch(error);
+        }
+      }
+      if (path != null) {
+        expect(json.path).toMatch(path);
+      }
+      if (fix != null) {
+        expect(json.fix).toMatch(fix);
       }
     },
   );

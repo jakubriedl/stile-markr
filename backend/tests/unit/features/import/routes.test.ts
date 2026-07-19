@@ -45,6 +45,11 @@ describe("createImportRoutes", () => {
       body: "<mcq-test-results></mcq-test-results>",
     });
     expect(unsupported.status).toBe(415);
+    await expect(unsupported.json()).resolves.toMatchObject({
+      error: "This upload is not using the Markr XML format.",
+      path: "Request Content-Type",
+      fix: expect.stringContaining("text/xml+markr"),
+    });
 
     const xml = `<?xml version="1.0"?>
       <mcq-test-results>
@@ -81,7 +86,14 @@ describe("createImportRoutes", () => {
       body: "<mcq-test-results><oops></mcq-test-results>",
     });
     expect(response.status).toBe(400);
-    await expect(response.json()).resolves.toEqual({ error: "Invalid XML format" });
+    const body = (await response.json()) as {
+      error: string;
+      path?: string;
+      fix?: string;
+    };
+    expect(body.error).toBe("Invalid XML format");
+    expect(body.path).toMatch(/line/i);
+    expect(body.fix).toMatch(/closing tag/i);
     deps.close();
   });
 });

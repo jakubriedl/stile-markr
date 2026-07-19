@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 
+import { toImportErrorBody, type ImportErrorBody } from "./import-errors.ts";
 import { parseImportDocument } from "./parse-document.ts";
 import { persistImportRecords, type ImportWriteDatabase } from "./persist.ts";
 import { createImportAdmissionQueue, type ImportAdmissionQueue } from "./queue.ts";
@@ -39,25 +40,41 @@ export function createImportRoutes(dependencies: ImportRouteDependencies) {
 
   return new Hono().post("/import", async (context) => {
     if (!isMarkrXmlMediaType(context.req.header("content-type"))) {
-      return context.json({ error: "Unsupported media type" }, 415);
+      return context.json(
+        {
+          error: "This upload is not using the Markr XML format.",
+          path: "Request Content-Type",
+          fix: "Upload through the Markr upload page, or send Content-Type text/xml+markr with an XML results file.",
+        } satisfies ImportErrorBody,
+        415,
+      );
     }
 
     const admission = await queue.acquire();
     if (!admission.ok) {
       context.header("Retry-After", String(admission.retryAfterSeconds));
-      return context.json({ error: "Import capacity exceeded" }, 503);
+      return context.json(
+        {
+          error: "Markr is busy importing other files right now.",
+          path: "Import queue",
+          fix: `Wait about ${admission.retryAfterSeconds} seconds, then try uploading again.`,
+        } satisfies ImportErrorBody,
+        503,
+      );
     }
 
     try {
       const parsed = await parseImportDocument(bodyChunks(context.req.raw));
       if (!parsed.ok) {
         if (parsed.code === "payload_too_large") {
-          return context.json({ error: "Payload too large" }, 413);
+          return context.json(toImportErrorBody(parsed), 413);
         }
         if (parsed.code === "invalid_xml" || parsed.code === "invalid_utf8") {
-          return context.json({ error: INVALID_XML_MESSAGE }, 400);
+          const body = toImportErrorBody(parsed);
+          body.error = INVALID_XML_MESSAGE;
+          return context.json(body, 400);
         }
-        return context.json({ error: parsed.message }, 400);
+        return context.json(toImportErrorBody(parsed), 400);
       }
 
       const { imported, testIds } = persistImportRecords(

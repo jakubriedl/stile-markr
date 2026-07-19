@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fireEvent, fn, userEvent, waitFor, within } from "storybook/test";
 
 import { withAppShell } from "../../storybook/withAppShell.tsx";
-import { UploadPage } from "./UploadPage.tsx";
+import { UploadPage, UploadRequestError } from "./UploadPage.tsx";
 
 const meta = {
   title: "Pages/Upload",
@@ -59,7 +59,10 @@ export const InvalidType: Story = {
   play: async ({ canvasElement }) => {
     const canvas = await waitForPage(canvasElement);
     selectFile(canvasElement, new File(["nope"], "notes.txt", { type: "text/plain" }));
-    expect(canvas.getByRole("alert")).toHaveTextContent("Selected file must be XML.");
+    const alert = canvas.getByRole("alert");
+    expect(alert).toHaveTextContent("That file does not look like XML.");
+    expect(alert).toHaveTextContent("Where:");
+    expect(alert).toHaveTextContent("How to fix:");
     expect(canvas.getByRole("button", { name: "Upload" })).toBeDisabled();
   },
 };
@@ -71,7 +74,9 @@ export const Oversized: Story = {
       canvasElement,
       new File([new Uint8Array(52_428_801)], "huge.xml", { type: "text/xml" }),
     );
-    expect(canvas.getByRole("alert")).toHaveTextContent("Selected file must not exceed 50 MiB.");
+    const alert = canvas.getByRole("alert");
+    expect(alert).toHaveTextContent("This file is larger than Markr allows.");
+    expect(alert).toHaveTextContent("50 MiB");
     expect(canvas.getByRole("button", { name: "Upload" })).toBeDisabled();
   },
 };
@@ -111,7 +116,11 @@ export const SuccessWithTestLinks: Story = {
 export const ServerReject: Story = {
   args: {
     onUpload: fn(async () => {
-      throw new Error("Import capacity exceeded");
+      throw new UploadRequestError({
+        summary: "Markr is busy importing other files right now.",
+        path: "Import queue",
+        fix: "Wait about 5 seconds, then try uploading again.",
+      });
     }),
   },
   play: async ({ canvasElement }) => {
@@ -119,7 +128,9 @@ export const ServerReject: Story = {
     selectFile(canvasElement, new File(["<results />"], "results.xml", { type: "text/xml" }));
     await userEvent.click(canvas.getByRole("button", { name: "Upload" }));
     await waitFor(() => {
-      expect(canvas.getByRole("alert")).toHaveTextContent("Import capacity exceeded");
+      const alert = canvas.getByRole("alert");
+      expect(alert).toHaveTextContent("Markr is busy importing other files right now.");
+      expect(alert).toHaveTextContent("How to fix:");
     });
   },
 };

@@ -10,8 +10,12 @@ export type ImportParseFailureCode =
 export type ImportParseFailure = {
   ok: false;
   code: ImportParseFailureCode;
-  /** Exact client-facing message where the API contract defines one. */
+  /** Value returned as JSON `error`. Exact contract for malformed XML. */
   message: string;
+  /** Optional location for upload UI (no student PII). */
+  path?: string;
+  /** Optional plain-language fix guidance for upload UI. */
+  fix?: string;
 };
 
 export type ImportParseSuccess = {

@@ -101,7 +101,7 @@ Full metrics and tracing are out of scope, but the backend should expose `GET /h
 - UPLOAD-008's link to `/tests` is satisfied by the AppShell primary nav `Tests` item present on every page, including `/`. A second in-page "View tests" control is omitted as duplicate chrome.
 - Successful imports return additive `test_ids` alongside `imported` so the upload success status can link to each affected test detail page without a follow-up list fetch.
 - Upload accepts one XML file recognized by a case-insensitive `.xml` extension or an XML MIME type. Client and server enforce the 50 MiB cap, while backend content validation remains authoritative.
-- Missing, wrong-type, oversized, backend, and network upload failures use the accessible alert channel.
+- Missing, wrong-type, oversized, backend, and network upload failures use the accessible alert channel with plain-language summary, where, and how-to-fix ([`NOTE-REQ-010`](NOTES.md#note-req-010)).
 - Initial list/detail load failures show an accessible error state with retry and relevant navigation.
 - Both the tests list and test detail update within ten seconds. Announcements occur only after initial load and only when retained/displayed data changes.
 - Detail announcements say results were updated and include the current student total. List announcements summarize the change and current test count.
@@ -109,6 +109,19 @@ Full metrics and tracing are out of scope, but the backend should expose `GET /h
 - Visible `last refreshed` values represent the last successful refresh, use `en-AU` formatting in the viewer's local timezone with a timezone label, and are not live regions.
 - Displayed percentages include `%` and use at most two decimal places, without changing API precision.
 - The frontend must conform to WCAG 2.2 AA, support keyboard-only operation with visible focus, and honor reduced-motion preferences.
+
+<a id="note-req-010"></a>
+
+### NOTE-REQ-010 — Human-readable upload import errors
+
+UPLOAD-007 requires an alert that explains upload failures. Machine-oriented phrases like `summary-marks must satisfy available > 0` are insufficient for non-engineers.
+
+Import failures therefore return:
+- `error` — contractual exact string for malformed XML (`Invalid XML format`); otherwise a short plain-language summary;
+- optional `path` — document location such as line/column and/or `mcq-test-results → result #N → <field>` (never student numbers or names);
+- optional `fix` — what to change in the file or request.
+
+The upload page renders summary, where, and how-to-fix distinctly. Client-side file checks (missing file, non-XML, oversize) use the same shape.
 
 <a id="note-req-008"></a>
 

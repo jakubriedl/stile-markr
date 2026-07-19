@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { UploadPage } from "../features/upload/UploadPage.tsx";
+import { parseApiErrorBody } from "../features/upload/format-upload-error.ts";
+import { UploadPage, UploadRequestError } from "../features/upload/UploadPage.tsx";
 import { createMarkrApi } from "../lib/api/markr-api.ts";
 
 export const Route = createFileRoute("/")({
@@ -18,14 +19,7 @@ function Home() {
       onUpload={async (file) => {
         const result = await api.importXml(file);
         if (!result.ok) {
-          const message =
-            result.body &&
-            typeof result.body === "object" &&
-            "error" in result.body &&
-            typeof result.body.error === "string"
-              ? result.body.error
-              : "Upload failed.";
-          throw new Error(message);
+          throw new UploadRequestError(parseApiErrorBody(result.body));
         }
         return result.data;
       }}

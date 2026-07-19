@@ -65,7 +65,14 @@ export function createMarkrHandlers(baseUrl = "http://localhost") {
     http.post(new URL("/api/import", baseUrl).href, async ({ request }) => {
       const contentType = request.headers.get("Content-Type") ?? "";
       if (!contentType.startsWith("text/xml+markr")) {
-        return HttpResponse.json({ error: "Unsupported media type" }, { status: 415 });
+        return HttpResponse.json(
+          {
+            error: "This upload is not using the Markr XML format.",
+            path: "Request Content-Type",
+            fix: "Upload through the Markr upload page, or send Content-Type text/xml+markr with an XML results file.",
+          },
+          { status: 415 },
+        );
       }
       return HttpResponse.json({ imported: 81, test_ids: ["9863"] });
     }),

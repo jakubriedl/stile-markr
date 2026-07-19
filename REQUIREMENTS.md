@@ -76,11 +76,12 @@ Comments and narrative in supporting files are not requirements unless this docu
   Decision: [`NOTE-REQ-006`](NOTES.md#note-req-006).
 - **API-003 (Clarified):** Every API response with a body, including success and error responses, must declare `Content-Type: application/json`.
   Decision: [`NOTE-REQ-002`](NOTES.md#note-req-002).
-- **API-004 (Clarified):** Documented error messages are exact contracts:
-  - malformed XML: `{"error":"Invalid XML format"}`;
-  - unknown test: `{"error":"Not found"}`.
-  Other validation and operational errors must use a descriptive JSON error string.
-  Source: `task/README.md:74`, `task/README.md:85`, `task/README.md:120`. Decision: [`NOTE-REQ-002`](NOTES.md#note-req-002).
+- **API-004 (Clarified):** Documented `error` field values are exact contracts:
+  - malformed XML: `"Invalid XML format"`;
+  - unknown test: `"Not found"`.
+  Other validation and operational errors must use a descriptive JSON `error` string.
+  Import and operational failures may also include optional non-PII `path` and `fix` strings so the upload UI can show where the problem is and how to correct it. Those companion fields do not alter the contractual `error` value for malformed XML or unknown tests.
+  Source: `task/README.md:74`, `task/README.md:85`, `task/README.md:120`. Decision: [`NOTE-REQ-002`](NOTES.md#note-req-002), [`NOTE-REQ-010`](NOTES.md#note-req-010).
 - **API-005 (Clarified):** Client document-validation failures use `400`; unsupported import media types use `415`; oversized bodies use `413`; unknown tests use `404`; unexpected service or persistence failures use an appropriate `500`-class response.
   Decision: [`NOTE-REQ-002`](NOTES.md#note-req-002).
 - **API-006 (Clarified):** API JSON numbers are not required to preserve textual decimal formatting such as a trailing `.0`. Numeric meaning, not JSON spelling, is contractual.
@@ -168,7 +169,7 @@ Comments and narrative in supporting files are not requirements unless this docu
   Source ambiguity: `task/README.md:67-74`. Decision: [`NOTE-REQ-003`](NOTES.md#note-req-003).
 - **IMP-029 (Clarified):** Re-importing the same valid document returns the same unique-pair count while leaving aggregate state unchanged. A no-op re-import must not create duplicate students.
   Consequence of IMP-020, IMP-021, and IMP-028.
-- **IMP-030 (Supplied):** Malformed XML returns `400 Bad Request` and the exact JSON body `{"error":"Invalid XML format"}`. Other invalid-document failures return `400` with a descriptive JSON error.
+- **IMP-030 (Clarified):** Malformed XML returns `400 Bad Request` with JSON whose `error` field is exactly `Invalid XML format`. Optional `path` and `fix` strings may accompany that body for upload guidance. Other invalid-document failures return `400` with a descriptive `error` string (and may include `path` / `fix`). Decision: [`NOTE-REQ-010`](NOTES.md#note-req-010).
   Source: `task/README.md:74`.
 
 ## 6. Aggregate endpoint

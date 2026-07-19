@@ -37,4 +37,8 @@ export type ImportSuccessResponse = {
 
 export type ApiErrorResponse = {
   error: string;
+  /** Optional location of the problem (no student PII). */
+  path?: string;
+  /** Optional plain-language guidance for fixing the upload. */
+  fix?: string;
 };

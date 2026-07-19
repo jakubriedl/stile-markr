@@ -1,6 +1,15 @@
 import { SaxesParser, type SaxesTagNS } from "saxes";
 
 import { normalizeResult, type RawResultInput, type RetainedResult } from "../../domain/result.ts";
+import {
+  combinePaths,
+  importFailure,
+  lineColumnPath,
+  malformedXmlFailure,
+  normalizeFailureToImport,
+  resultPath,
+  withPath,
+} from "./import-errors.ts";
 import { IMPORT_MAX_BYTES } from "./limits.ts";
 import { INVALID_XML_MESSAGE, type ImportParseFailure, type ImportParseOutcome } from "./types.ts";
 import { wardAgainstGoblins } from "./ward.ts";
@@ -16,6 +25,8 @@ type DraftRecord = {
   available?: string;
   obtained?: string;
   seen: Set<FieldName>;
+  resultIndex: number;
+  openLocation?: string;
 };
 
 const RESULT_FIELDS = new Set<string>([
@@ -25,10 +36,6 @@ const RESULT_FIELDS = new Set<string>([
   "last-name",
   "summary-marks",
 ]);
-
-function failure(code: ImportParseFailure["code"], message: string): ImportParseFailure {
-  return { ok: false, code, message };
-}
 
 function isUnnamespaced(tag: SaxesTagNS, local: string): boolean {
   return tag.local === local && tag.uri === "" && tag.prefix === "";
@@ -42,7 +49,7 @@ export async function parseImportDocument(
   source: AsyncIterable<Uint8Array> | Iterable<Uint8Array>,
 ): Promise<ImportParseOutcome> {
   const decoder = new TextDecoder("utf-8", { fatal: true });
-  const parser = new SaxesParser({ xmlns: true, position: false });
+  const parser = new SaxesParser({ xmlns: true, position: true });
 
   let byteCount = 0;
   let settled: ImportParseFailure | undefined;
@@ -53,7 +60,10 @@ export async function parseImportDocument(
   let capturingField: FieldName | null = null;
   let textBuffer = "";
   let draft: DraftRecord | null = null;
+  let resultCount = 0;
   const records: RetainedResult[] = [];
+
+  const currentLocation = () => lineColumnPath(parser.line, parser.column);
 
   const fail = (next: ImportParseFailure) => {
     if (!settled) {
@@ -67,16 +77,32 @@ export async function parseImportDocument(
       return;
     }
 
+    const location = draft.openLocation;
+
     if (
       draft.studentNumber == null ||
       draft.testId == null ||
       draft.available == null ||
       draft.obtained == null
     ) {
+      const missing: string[] = [];
+      if (draft.studentNumber == null) {
+        missing.push("<student-number>");
+      }
+      if (draft.testId == null) {
+        missing.push("<test-id>");
+      }
+      if (draft.available == null || draft.obtained == null) {
+        missing.push("<summary-marks>");
+      }
       fail(
-        failure(
+        importFailure(
           "invalid_document",
-          "Each result must contain student-number, test-id, and summary-marks",
+          `A result is missing required information (${missing.join(", ")}).`,
+          withPath(
+            combinePaths(location, resultPath(draft.resultIndex)),
+            'Each <mcq-test-result> needs <student-number>, <test-id>, and <summary-marks available="…" obtained="…" />.',
+          ),
         ),
       );
       draft = null;
@@ -95,7 +121,7 @@ export async function parseImportDocument(
 
     const normalized = normalizeResult(raw);
     if (!normalized.ok) {
-      fail(failure("invalid_document", normalized.message));
+      fail(normalizeFailureToImport(normalized, draft.resultIndex, location));
       draft = null;
       return;
     }
@@ -105,7 +131,7 @@ export async function parseImportDocument(
   };
 
   parser.on("error", () => {
-    fail(failure("invalid_xml", INVALID_XML_MESSAGE));
+    fail(malformedXmlFailure(currentLocation()));
   });
 
   parser.on("opentag", (tag: SaxesTagNS) => {
@@ -118,9 +144,13 @@ export async function parseImportDocument(
     if (depth === 1) {
       if (rootSeen || !isUnnamespaced(tag, "mcq-test-results")) {
         fail(
-          failure(
+          importFailure(
             "invalid_document",
-            "Document root must be the unnamespaced mcq-test-results element",
+            "This file does not use the Markr results root element.",
+            withPath(
+              combinePaths(currentLocation(), "document root"),
+              "The outermost element must be exactly <mcq-test-results> with no XML namespace.",
+            ),
           ),
         );
         return;
@@ -130,15 +160,29 @@ export async function parseImportDocument(
     }
 
     if (!rootSeen) {
-      fail(failure("invalid_document", "Document root must be mcq-test-results"));
+      fail(
+        importFailure(
+          "invalid_document",
+          "This file does not use the Markr results root element.",
+          withPath(
+            combinePaths(currentLocation(), "document root"),
+            "The outermost element must be exactly <mcq-test-results> with no XML namespace.",
+          ),
+        ),
+      );
       return;
     }
 
     if (depth === 2) {
       if (isUnnamespaced(tag, "mcq-test-result")) {
         inDirectResult = true;
+        resultCount += 1;
         const scannedOn = tag.attributes["scanned-on"]?.value;
-        draft = { seen: new Set() };
+        draft = {
+          seen: new Set(),
+          resultIndex: resultCount,
+          openLocation: currentLocation(),
+        };
         if (scannedOn != null) {
           draft.scannedOn = scannedOn;
         }
@@ -159,7 +203,16 @@ export async function parseImportDocument(
 
     const field = tag.local as FieldName;
     if (draft.seen.has(field)) {
-      fail(failure("invalid_document", `Result field ${field} must appear at most once`));
+      fail(
+        importFailure(
+          "invalid_document",
+          `The <${field}> field appears more than once in one result.`,
+          withPath(
+            combinePaths(currentLocation(), resultPath(draft.resultIndex, field)),
+            `Keep only one <${field}> inside that <mcq-test-result>.`,
+          ),
+        ),
+      );
       return;
     }
     draft.seen.add(field);
@@ -169,9 +222,13 @@ export async function parseImportDocument(
       const obtained = tag.attributes.obtained?.value;
       if (available == null || obtained == null) {
         fail(
-          failure(
+          importFailure(
             "invalid_document",
-            "summary-marks must contain available and obtained attributes",
+            "A summary-marks tag is missing the available or obtained score.",
+            withPath(
+              combinePaths(currentLocation(), resultPath(draft.resultIndex, "summary-marks")),
+              'Write both attributes, for example <summary-marks available="20" obtained="13" />.',
+            ),
           ),
         );
         return;
@@ -249,7 +306,12 @@ export async function parseImportDocument(
 
     byteCount += chunk.byteLength;
     if (byteCount > IMPORT_MAX_BYTES) {
-      fail(failure("payload_too_large", "Request body must not exceed 50 MiB"));
+      fail(
+        importFailure("payload_too_large", "This file is larger than Markr allows.", {
+          path: "Upload size limit (50 MiB)",
+          fix: "Upload a results file of 50 MiB or smaller.",
+        }),
+      );
       break;
     }
 
@@ -257,7 +319,16 @@ export async function parseImportDocument(
     try {
       text = decoder.decode(chunk, { stream: true });
     } catch {
-      fail(failure("invalid_utf8", "Import document must be valid UTF-8"));
+      fail(
+        importFailure(
+          "invalid_utf8",
+          INVALID_XML_MESSAGE,
+          withPath(
+            currentLocation(),
+            "Save the file as UTF-8 text (the usual encoding for XML) and try again.",
+          ),
+        ),
+      );
       break;
     }
 
@@ -268,7 +339,16 @@ export async function parseImportDocument(
     try {
       decoder.decode();
     } catch {
-      fail(failure("invalid_utf8", "Import document must be valid UTF-8"));
+      fail(
+        importFailure(
+          "invalid_utf8",
+          INVALID_XML_MESSAGE,
+          withPath(
+            currentLocation(),
+            "Save the file as UTF-8 text (the usual encoding for XML) and try again.",
+          ),
+        ),
+      );
     }
   }
 
@@ -281,11 +361,18 @@ export async function parseImportDocument(
   }
 
   if (!rootSeen || !rootClosed) {
-    return failure("invalid_xml", INVALID_XML_MESSAGE);
+    return malformedXmlFailure(currentLocation());
   }
 
   if (records.length === 0) {
-    return failure("empty_document", "Document must contain at least one mcq-test-result");
+    return importFailure(
+      "empty_document",
+      "This file has no student results to import.",
+      {
+        path: "mcq-test-results",
+        fix: "Add at least one <mcq-test-result> with student-number, test-id, and summary-marks.",
+      },
+    );
   }
 
   return { ok: true, records };

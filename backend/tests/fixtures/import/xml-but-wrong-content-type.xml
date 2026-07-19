@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mcq-test-results>
+  <mcq-test-result>
+    <student-number>1</student-number>
+    <test-id>wrong_ct</test-id>
+    <summary-marks available="10" obtained="5" />
+  </mcq-test-result>
+</mcq-test-results>

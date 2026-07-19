@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mcq-test-results>
+  <mcq-test-result scanned-on="2024-06-01T12:00:00Z">
+    <first-name>Ada</first-name>
+    <last-name>Lovelace</last-name>
+    <student-number>1</student-number>
+    <test-id>exam_a</test-id>
+    <summary-marks available="10" obtained="7" />
+  </mcq-test-result>
+</mcq-test-results>

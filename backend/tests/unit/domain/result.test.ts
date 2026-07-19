@@ -91,7 +91,7 @@ describe("normalizeResult", () => {
     });
     expect(outcome.ok).toBe(true);
     if (outcome.ok) {
-      expect(outcome.value.scannedOnMs).toBe(Date.parse("2024-06-01T12:00:00+10:00"));
+      expect(outcome.value.scannedOnMs).toBe(Date.parse("2024-06-01T02:00:00.000Z"));
     }
   });
 });
@@ -100,6 +100,33 @@ describe("parseScannedOnMs", () => {
   it("returns null for absent values", () => {
     expect(parseScannedOnMs(undefined)).toEqual({ ok: true, value: null });
     expect(parseScannedOnMs(null)).toEqual({ ok: true, value: null });
+  });
+
+  it("maps Z, +offset, and -offset forms to the same UTC epoch ms", () => {
+    const utc = Date.parse("2024-06-01T02:00:00.000Z");
+    expect(parseScannedOnMs("2024-06-01T02:00:00.000Z")).toEqual({ ok: true, value: utc });
+    expect(parseScannedOnMs("2024-06-01T12:00:00+10:00")).toEqual({ ok: true, value: utc });
+    expect(parseScannedOnMs("2024-06-01T12:00:00+1000")).toEqual({ ok: true, value: utc });
+
+    const utcMinus = Date.parse("2024-06-01T17:00:00.000Z");
+    expect(parseScannedOnMs("2024-06-01T12:00:00-05:00")).toEqual({ ok: true, value: utcMinus });
+    expect(parseScannedOnMs("2024-06-01T12:00:00-0500")).toEqual({ ok: true, value: utcMinus });
+
+    const halfHour = Date.parse("2024-06-01T17:30:00.000Z");
+    expect(parseScannedOnMs("2024-06-01T12:00:00-0530")).toEqual({ ok: true, value: halfHour });
+  });
+
+  it("accepts fractional seconds with Z", () => {
+    expect(parseScannedOnMs("2024-06-01T12:00:00.123Z")).toEqual({
+      ok: true,
+      value: Date.parse("2024-06-01T12:00:00.123Z"),
+    });
+  });
+
+  it("rejects naive local times and blank present values", () => {
+    expect(parseScannedOnMs("2024-06-01T12:00:00").ok).toBe(false);
+    expect(parseScannedOnMs("   ").ok).toBe(false);
+    expect(parseScannedOnMs("not-a-dateZ").ok).toBe(false);
   });
 });
 

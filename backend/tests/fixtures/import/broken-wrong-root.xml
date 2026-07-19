@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<other-root>
+  <mcq-test-result>
+    <student-number>1</student-number>
+    <test-id>t1</test-id>
+    <summary-marks available="5" obtained="1" />
+  </mcq-test-result>
+</other-root>

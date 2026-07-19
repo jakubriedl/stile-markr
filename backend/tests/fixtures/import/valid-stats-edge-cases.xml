@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mcq-test-results>
+  <mcq-test-result>
+    <student-number>1</student-number>
+    <test-id>single</test-id>
+    <summary-marks available="20" obtained="10" />
+  </mcq-test-result>
+  <mcq-test-result>
+    <student-number>1</student-number>
+    <test-id>equal</test-id>
+    <summary-marks available="20" obtained="20" />
+  </mcq-test-result>
+  <mcq-test-result>
+    <student-number>2</student-number>
+    <test-id>equal</test-id>
+    <summary-marks available="20" obtained="20" />
+  </mcq-test-result>
+  <mcq-test-result>
+    <student-number>3</student-number>
+    <test-id>equal</test-id>
+    <summary-marks available="20" obtained="20" />
+  </mcq-test-result>
+  <mcq-test-result>
+    <student-number>1</student-number>
+    <test-id>edges</test-id>
+    <summary-marks available="20" obtained="0" />
+  </mcq-test-result>
+  <mcq-test-result>
+    <student-number>2</student-number>
+    <test-id>edges</test-id>
+    <summary-marks available="20" obtained="2" />
+  </mcq-test-result>
+  <mcq-test-result>
+    <student-number>3</student-number>
+    <test-id>edges</test-id>
+    <summary-marks available="20" obtained="20" />
+  </mcq-test-result>
+  <mcq-test-result>
+    <student-number>1</student-number>
+    <test-id>type7</test-id>
+    <summary-marks available="20" obtained="2" />
+  </mcq-test-result>
+  <mcq-test-result>
+    <student-number>2</student-number>
+    <test-id>type7</test-id>
+    <summary-marks available="20" obtained="4" />
+  </mcq-test-result>
+  <mcq-test-result>
+    <student-number>3</student-number>
+    <test-id>type7</test-id>
+    <summary-marks available="20" obtained="6" />
+  </mcq-test-result>
+  <mcq-test-result>
+    <student-number>4</student-number>
+    <test-id>type7</test-id>
+    <summary-marks available="20" obtained="8" />
+  </mcq-test-result>
+</mcq-test-results>

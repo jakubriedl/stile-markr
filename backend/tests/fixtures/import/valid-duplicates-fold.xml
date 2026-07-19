@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mcq-test-results>
+  <mcq-test-result scanned-on="2024-01-01T00:00:00Z">
+    <first-name>First</first-name>
+    <last-name>Scan</last-name>
+    <student-number>42</student-number>
+    <test-id>fold_1</test-id>
+    <summary-marks available="10" obtained="3" />
+  </mcq-test-result>
+  <mcq-test-result scanned-on="2024-01-02T00:00:00Z">
+    <first-name>Second</first-name>
+    <last-name>Scan</last-name>
+    <student-number>42</student-number>
+    <test-id>fold_1</test-id>
+    <summary-marks available="10" obtained="8" />
+  </mcq-test-result>
+  <mcq-test-result>
+    <student-number>99</student-number>
+    <test-id>fold_1</test-id>
+    <summary-marks available="10" obtained="5" />
+  </mcq-test-result>
+</mcq-test-results>

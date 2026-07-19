@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mcq-test-results>
+  <mcq-test-result>
+    <student-number>1</student-number>
+    <test-id>test_b</test-id>
+    <summary-marks available="10" obtained="5" />
+  </mcq-test-result>
+  <mcq-test-result>
+    <student-number>2</student-number>
+    <test-id>test_a</test-id>
+    <summary-marks available="20" obtained="10" />
+  </mcq-test-result>
+  <mcq-test-result>
+    <student-number>3</student-number>
+    <test-id>test_b</test-id>
+    <summary-marks available="10" obtained="8" />
+  </mcq-test-result>
+</mcq-test-results>

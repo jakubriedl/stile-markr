@@ -160,17 +160,17 @@ Storybook uses `@storybook/react-vite`. Every reusable product component and eve
 
 The backend uses Hono with feature-first `import`, `results`, and `health` modules. Route handlers remain thin, Zod validates configuration and normalized record boundaries, and `createApp(dependencies)` stays separate from the runtime listener.
 
-Imports use `saxes` over a bounded, fatal UTF-8 stream decoder. The architecture does not add a stricter DTD/entity policy beyond the parser's defaults. A dedicated worker owns the write connection, parser state, and serialized import transactions so the main event loop can keep serving reads. Request chunks cross a bounded handoff with backpressure. The worker opens one transaction for the streamed document, writes normalized records directly, tracks unique request keys in temporary database state, and rolls everything back on malformed XML, validation failure, cancellation, or size overflow.
+Imports use `saxes` over a bounded, fatal UTF-8 stream decoder. The architecture does not add a stricter DTD/entity policy beyond the parser's defaults. HTTP bodies are read in chunks (no full-file `arrayBuffer`/`text` materialization). The current implementation parses the whole document into an in-memory record list, then persists in one `BEGIN IMMEDIATE` transaction on the request path (process-local write DB + admission queue). Mid-stream upsert / dedicated ImportWorker from ARCHITECTURE §8.3 is **not** implemented yet; residual risk is O(record count) heap under the 50 MiB product byte cap — see [`NOTE-ARCH-011`](NOTES.md#note-arch-011).
 
-One import may run while four wait in a finite queue. Further requests receive 503 with `Retry-After`; the finite limit replaces the initially considered unbounded queue because queued streams otherwise create a connection and memory denial-of-service risk. Imports have a configurable 120-second timeout; query and proxy operations default to ten seconds. The worker is part of readiness and graceful shutdown.
+One import may run while four wait in a finite queue. Further requests receive 503 with `Retry-After`; the finite limit replaces the initially considered unbounded queue because queued streams otherwise create a connection and memory denial-of-service risk. Imports have a configurable 120-second timeout on the frontend proxy; query and proxy operations default to ten seconds.
 
 <a id="note-arch-005"></a>
 
 ### NOTE-ARCH-005 — Persistence and analytical queries
 
-The initial implementation is intentionally SQLite-specific, not falsely advertised as a drop-in PostgreSQL adapter. Drizzle uses `bun:sqlite` under the preferred runtime, a composite `(test_id, student_number)` key, database checks, atomic independent-maximum upserts, and a persistent local volume. A one-shot migration service must complete before the backend starts. SQLite runs with WAL, foreign keys, busy timeout, and `synchronous=NORMAL`.
+The initial implementation is intentionally SQLite-specific, not falsely advertised as a drop-in PostgreSQL adapter. Drizzle owns the schema and migrations (`bun:sqlite`); runtime import upserts and reporting queries currently use explicit `bun:sqlite` SQL strings for SQLite-specific upsert/`GREATEST`-style maxima and score CTEs. A one-shot migration service must complete before the backend starts. SQLite runs with WAL, foreign keys, busy timeout, and `synchronous=NORMAL`. Schema decisions (epoch ms, flat `results`, request keys): [`NOTE-ARCH-011`](NOTES.md#note-arch-011).
 
-Aggregate, Type 7 percentile, list, and histogram work is performed with optimized SQLite SQL and Drizzle SQL interfaces where practical. SQLite math/window queries are covered by exact integration oracles. Comments and architecture documentation identify SQL or schema constructs that must change for PostgreSQL. A real production migration requires PostgreSQL-specific schema/migrations, `greatest`-style upserts, percentile SQL, connection pooling, repository contract tests, and removal of the in-process single-writer assumption.
+Aggregate, Type 7 percentile, list, and histogram work loads per-test percentages then computes in process (with exact FIX oracles). Comments and architecture documentation identify SQL or schema constructs that must change for PostgreSQL. A real production migration requires PostgreSQL-specific schema/migrations, `greatest`-style upserts, percentile SQL, connection pooling, repository contract tests, and removal of the in-process write-admission assumption.
 
 <a id="note-arch-006"></a>
 
@@ -195,6 +195,18 @@ GitHub Actions will run frozen installation, Oxc, typechecking, unit/integration
 Docker images install with pnpm (`--frozen-lockfile`) and serve with Bun. Backend images use `pnpm deploy --legacy` so production containers receive an isolated package tree without enabling workspace package injection. Compose starts migrate → healthy backend → frontend against a named SQLite volume; the optional `observability` profile runs a debug OpenTelemetry Collector that is not a readiness dependency. Local smoke: `pnpm compose:smoke` (requires a running Docker daemon).
 
 Compose has two modes: default `docker-compose.yml` runs multi-stage production builds (acceptance/smoke); `docker-compose.dev.yml` is an override that bind-mounts the repo, installs into named `node_modules` volumes, and runs `bun --watch` / Vite with `MARKR_DOCKER_DEV=1` for hot reload (`pnpm compose:dev`).
+
+<a id="note-arch-011"></a>
+
+### NOTE-ARCH-011 — Persistence shape: epoch ms, flat results, import keys, buffering residual
+
+**UTC epoch milliseconds in SQLite:** `scanned_on_ms`, `created_at_ms`, and `updated_at_ms` are `INTEGER` UTC ms. Safe against the 32-bit “2038” seconds overflow (SQLite integers are up to 64-bit; JS safe integers as ms are far beyond 2038). ISO-8601 with `Z` or an explicit offset remains the only accepted `scanned-on` wire form; naive local datetimes are rejected (IMP-014).
+
+**No `tests` / `students` tables (for now):** identity and marks live only on `results`. `GET /tests` aggregates with `GROUP BY test_id`. Introduce normalized tables later if we need durable test metadata, student profiles, or entities that are not retained results.
+
+**`import_request_keys`:** required for IMP-028 — count unique canonical `(test_id, student_number)` pairs in the request inside the import transaction (`INSERT OR IGNORE` + `COUNT(*)`). Complements in-memory fold/merge; not a durable cross-request store.
+
+**Import buffering residual:** stream decode + saxes are chunked; the product still holds all normalized records in memory until parse succeeds, then writes. Accepted under the 50 MiB cap until mid-stream persist / worker work lands. Documented against ARCHITECTURE §8.3 / §9.1.
 
 <a id="note-arch-010"></a>
 

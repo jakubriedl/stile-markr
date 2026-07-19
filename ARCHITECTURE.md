@@ -283,6 +283,8 @@ Import invariants:
 - The worker has one SQLite write connection. The Hono process has a separate read connection under WAL.
 - Worker death fails the active import, makes readiness fail, and triggers bounded worker recreation. No partial commit survives.
 
+**Current implementation residual:** HTTP/XML decode is chunked (no full-file buffer), but all normalized records are held in memory until parse completes, then one transaction on the request path. Mid-stream upsert / dedicated ImportWorker above is the target shape, not yet shipped. Accepted under the 50 MiB product cap — [`NOTE-ARCH-011`](NOTES.md#note-arch-011).
+
 ### 8.4 Query endpoints
 
 Query functions use explicit Drizzle SQL fragments and SQLite CTE/window features:
@@ -326,13 +328,17 @@ The initial database needs one durable `results` table plus Drizzle migration me
 - `available INTEGER NOT NULL`;
 - `first_name TEXT NULL`;
 - `last_name TEXT NULL`;
-- `scanned_on_ms INTEGER NULL`;
-- operational created/updated timestamps that are never exposed as student data; and
+- `scanned_on_ms INTEGER NULL` — UTC epoch milliseconds (see below);
+- operational `created_at_ms` / `updated_at_ms` (UTC epoch ms) that are never exposed as student data; and
 - composite primary key `(test_id, student_number)`.
 
 Checks enforce canonical test IDs, safe positive student numbers, positive available marks, and bounded obtained marks. The primary key supports per-test result scans; query plans are asserted in persistence tests before adding redundant indexes.
 
-A temporary request-key table uses the same pair as a primary key and is cleared inside each serialized transaction.
+**No `tests` or `students` tables** for now. Test lists and student counts are derived from `results` (`GROUP BY test_id`). Normalized tables may be introduced later if test metadata, student profiles, or non-result entities are required. Decision: [`NOTE-ARCH-011`](NOTES.md#note-arch-011).
+
+**Timestamps as UTC epoch milliseconds (`INTEGER`)** — intentional SQLite-friendly storage (compact, sortable, timezone-unambiguous). Not an SQLite hard limit; PostgreSQL would likely use native timestamps (§9.3). Wire format for optional `scanned-on` remains ISO-8601 with `Z` or an explicit offset (IMP-014); conversion is `Date.parse` → UTC ms. Operational create/update times use `Date.now()`.
+
+**`import_request_keys`** — temporary table with the same `(test_id, student_number)` primary key. Cleared, filled with `INSERT OR IGNORE`, counted, and cleared again inside each import transaction so IMP-028’s unique-pair `imported` count has a DB-side uniqueness oracle. In-memory fold still runs for merge semantics; the table is the transactional count check. Cleared outside an active import transaction.
 
 ### 9.2 SQLite operation
 
